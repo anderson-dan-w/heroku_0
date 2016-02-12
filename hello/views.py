@@ -8,17 +8,13 @@ from .models import Greeting
 
 # Create your views here.
 def index(request):
-    return HttpResponse("Hello")
-    #req = requests.get("http://httpbin.org/status/418")
-    #print(req.text)
-    #return HttpResponse("<pre>{}</pre>".format(req.text))
-
+    return render(request, 'base.html')
 
 def db(request):
     greeting = Greeting()
     greeting.save()
-
     greetings = Greeting.objects.all()
-
     return render(request, 'db.html', {'greetings': greetings})
 
+def blogs(request):
+    return render(request, "blogs.html")
