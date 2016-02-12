@@ -8,7 +8,7 @@ from .models import Greeting
 
 # Create your views here.
 def index(request):
-    return render(request, 'base.html')
+    return render(request, 'index.html')
 
 def db(request):
     greeting = Greeting()
