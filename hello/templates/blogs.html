@@ -1,8 +1,12 @@
 {% extends "base.html" %}
 {% load staticfiles %}
+
 {% block cssfiles %}
-<link rel="stylesheet" type="text/css" href="{% static 'admin/css/hljs-androidstudio.css' %}" />
+<link rel=stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/styles/androidstudio.min.css" />
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
 {% endblock %}
+
 {% block content %}
 {% if blogIndex %}
 <h2> {{ title }} </h2>
@@ -19,7 +23,5 @@
 $("#home")[0].classList.remove("active");
 $("#blogs")[0].classList.add("active");
 </script>
-<script type="text/javascript" src="{% static 'admin/js/highlight.pack.js' %}"></script>
-<script>hljs.initHighlightingOnLoad();</script>
 {% endblock %}
 
