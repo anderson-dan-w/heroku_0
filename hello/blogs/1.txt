@@ -1,0 +1,7 @@
+#title Testing Highlight JS
+#tags comp-sci
+<pre><code class="python">
+@someTest
+for i in range(10):
+    print("Hello from {}".format(i))
+</code></pre>

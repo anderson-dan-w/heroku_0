@@ -13,6 +13,7 @@ urlpatterns = patterns('',
     url(r'^$', hello.views.index, name='index'),
     url(r'^db', hello.views.db, name='db'),
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^blogs/', hello.views.blogs, name='blogs'),
-
+    url(r'^blogs/$', hello.views.blogs, name='blogs'),
+    ## eg: /blogs/0
+    url(r'^blogs/(?P<blogIndex>[0-9]+)/', hello.views.nblog, name='some_blog'),
 )

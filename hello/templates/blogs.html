@@ -1,13 +1,25 @@
 {% extends "base.html" %}
 {% load staticfiles %}
-
+{% block cssfiles %}
+<link rel="stylesheet" type="text/css" href="{% static 'admin/css/hljs-androidstudio.css' %}" />
+{% endblock %}
 {% block content %}
-<h1> Hey Blogs </h1>
+{% if blogIndex %}
+<h2> {{ title }} </h2>
+<div>
+{% for tag in tags %}
+    <button type="button" class="btn btn-sm btn-info">{{ tag }}</button>
+{% endfor %}
+</div>
+<div> {% autoescape off %}{{ text }}{% endautoescape %}</div>
+{% endif %}
+
 
 <script>
 $("#home")[0].classList.remove("active");
 $("#blogs")[0].classList.add("active");
 </script>
-
+<script type="text/javascript" src="{% static 'admin/js/highlight.pack.js' %}"></script>
+<script>hljs.initHighlightingOnLoad();</script>
 {% endblock %}
 
