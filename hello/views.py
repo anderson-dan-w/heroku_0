@@ -19,16 +19,17 @@ def blogParse(fname):
     d = {}
     with open(fname) as fh:
         lines = fh.read().split("\n")
-    toRemove = []
-    for line in lines:
-        if line.startswith("#title"):
-            d['title'] = line.replace("#title ","")
-            toRemove.append(line)
-        elif line.startswith("#tags"):
-            d['tags'] = line.split()[1:] ## skip '#tags'
-            toRemove.append(line)
+    toRemove = {l for l in lines if l.startswith("#")}
     for line in toRemove:
         lines.remove(line)
+        if line.startswith("#title"):
+            d['title'] = line.replace("#title ","")
+        elif line.startswith("#tags"):
+            d['tags'] = line.split()[1:] ## skip '#tags'
+        elif line.startswith("#published"):
+            d['published'] = line.replace("#published ","")
+        elif line.startswith("#lastEdit"):
+            d['lastEdit'] = line.replace("#lastEdit ","")
     d['text'] = "\n".join(lines)
     return d
 
