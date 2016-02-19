@@ -1,4 +1,4 @@
-#title Testing Highlight JS
+#title Words with All the Vowels
 #tags comp-sci letters words
 #published 2016-02-18 21:56
 #lastEdit 2016-02-18 22:59
