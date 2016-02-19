@@ -1,7 +1,36 @@
 #title Testing Highlight JS
-#tags comp-sci
-<pre><code class="python">
-@someTest
-for i in range(10):
-    print("Hello from {}".format(i))
+#tags comp-sci letters words
+#published 2016-02-18 21:56
+#lastEdit 2016-02-18 22:59
+One of the things I enjoying messing around with in computer science is words. I like writing quick-and-dirty programs to give me a list of words with some characteristic. For example, the following (python) code snippet would give me all words that contain all 5 vowels (<code>"AEIOU"</code>):
+<pre><code class="python"># assuming I have a set/list of words, in all CAPS.
+allVowels = set()
+for word in WORDS:
+    missing = False
+    for vowel in "AEIOU":
+        if vowel not in word:
+            missing = true
+            # break, if we want to prematurely optimize
+    if not missing:
+        allVowels.add(word)
 </code></pre>
+
+or, because I enjoy Python, and I enjoy being concise (while still being readable; this distinction is sure to come up in the future):
+<pre><code>allVowels = {w for w in WORDS if all(v in w for v in "AEIOU")}
+</code></pre>
+
+and that's it. That provides me with a nice, long list (based on the word-lists I have) of over 2500 words with all the vowels. My list starts (when sorted alphabetically) with <code>ABOIDEAU</code>, passes through normal words like <code>EDUCATION</code>, <code>MOUNTAINEER</code>, and <code>PNEUMONIA</code> and finally ends with <code>WAREHOUSING</code>.
+
+This, to me, immediately points out a few things:
+<ul>
+<li>There are some weird words - I have never heard of <code>ABOIDEAU</code></li>
+<li>Some of these words have the vowels more than once - two <code>E</code>s and <code>I</code>s in <code>MOUNTAINEERING</code>
+<li> There aren't any words that start with <code>X</code>, <code>Y</code>, or <code>Z</code> that contains all the vowels.
+</ul>
+
+Using Plotly (more on this later), it's easy to see the distribution of words, based on the starting letter, i.e. "There are 255 words that start with <code>A</code> that use all 5 vowels", etc.:
+    <div>
+        <a href="https://plot.ly/~anderson.dan.w/5/" target="_blank" title="Words with all 5 Vowels, by Initial Letter" style="display: block; text-align: center;"><img src="https://plot.ly/~anderson.dan.w/5.png" alt="Words with all 5 Vowels, by Initial Letter" style="max-width: 100%;width: 600px;"  width="600" onerror="this.onerror=null;this.src='https://plot.ly/404.png';" /></a>
+        <script data-plotly="anderson.dan.w:5"  src="https://plot.ly/embed.js" async></script>
+    </div>
+
