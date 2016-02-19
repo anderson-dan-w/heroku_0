@@ -5,19 +5,40 @@
 <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/styles/androidstudio.min.css" />
 <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad();</script>
+<style>
+#footer {
+    padding-bottom: 2%;
+}
+</style>
 {% endblock %}
 
 {% block content %}
 {% if blogIndex %}
-<h2> {{ title }} </h2>
-<div>
-{% for tag in tags %}
-    <button type="button" class="btn btn-sm btn-info">{{ tag }}</button>
-{% endfor %}
+<div class="container" role="main">
+    <div class="panel panel-info">
+        <div class="panel-heading">
+            <h2 class="panel-title"> {{ title }} </h2>
+        </div>
+        <div class="panel-content">
+            <div> {% autoescape off %}{{ text }}{% endautoescape %}</div>
+        </div>
+    </div>
+    <div class="container">
+    {% for tag in tags %}
+        <button type="button" class="btn btn-sm btn-info">{{ tag }}</button>
+    {% endfor %}
+    </div>
+    <div class="container">
+        {% if published or lastEdit %}
+        <span class="label label-warning">Published: {{ published }}</span>
+        <br />
+        <span class="label label-warning">Last edited: {{ lastEdit }}</span>
+        {% endif %}
+    </div>
 </div>
-<div> {% autoescape off %}{{ text }}{% endautoescape %}</div>
-{% endif %}
-
+{% endif %}{# end if blogIndex #}
+<div id="footer">
+</div>
 
 <script>
 $("#home")[0].classList.remove("active");
