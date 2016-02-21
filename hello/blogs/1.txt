@@ -1,7 +1,7 @@
 #title Words with All the Vowels
-#tags comp-sci letters words
+#tags programming letters words
 #published 2016-02-18 21:56
-#lastEdit 2016-02-20 13:44
+#lastEdit 2016-02-20 18:58
 One of the things I enjoying messing around with in computer science is words. I like writing quick-and-dirty programs to give me a list of words with some characteristic. For example, the following (python) code snippet would give me all words that contain all 5 vowels (<code>"AEIOU"</code>):
 <pre><code class="python"># assuming I have a set/list of words, in all CAPS.
 allVowels = set()
@@ -19,11 +19,11 @@ or, because I enjoy Python, and I enjoy being concise (while still being readabl
 <pre><code>allVowels = {w for w in WORDS if all(v in w for v in "AEIOU")}
 </code></pre>
 
-and that's it. That provides me with a nice, long list (based on the word-lists I have) of over 2500 words with all the vowels. My list starts (when sorted alphabetically) with <code>ABOIDEAU</code>, passes through normal words like <code>EDUCATION</code>, <code>MOUNTAINEERING</code>, and <code>PNEUMONIA</code> and finally ends with <code>WAREHOUSING</code>.
+and that's it. That provides a nice, long list (based on the word-lists I have) of over 2500 words with all the vowels. My list starts (when sorted alphabetically) with <code>ABOIDEAU</code>, passes through normal words like <code>EDUCATION</code>, <code>MOUNTAINEERING</code>, and <code>PNEUMONIA</code> and finally ends with <code>WAREHOUSING</code>.
 
 This, to me, immediately points out a few things:
 <ul>
-<li>There are some weird words - I have never heard of <code>ABOIDEAU</code></li>
+<li>There are some weird words - never heard of <code>ABOIDEAU</code></li>
 <li>Some of these words have the vowels more than once - two <code>E</code>s and <code>I</code>s in <code>MOUNTAINEERING</code>
 <li> There aren't any words that start with <code>X</code>, <code>Y</code>, or <code>Z</code> that contains all the vowels.
 </ul>
@@ -47,3 +47,16 @@ Throw that into <a href="http://www.plot.ly">plotly</a> and:
     <script data-plotly="anderson.dan.w:9"  src="https://plot.ly/embed.js" async></script>
 </div>
 
+Nothing too surprising here - generally common letters tend to have more 'panvowellic' words than less common letters. The possible exception, in my eyes, being the <code>UNIGNORABLE</code> high count for <code>U</code>, but that <code>UNORGANIZED</code> result might <code>UNQUESTIONABLY</code> be explained by the preponderance of words starting with the <code>UN</code> prefix.
+<br /><br />
+One more final thing I can quickly ask of this data is - "Which words use all the vowels, exactly once, in alphabetical order?". The code for this isn't quite as pretty or clean, but not terrible:
+<pre><code>inOrder = set()
+for word in allVowelsOnce:
+    indices = [word.index(v) for v in "AEIOU"]
+    if sorted(indices) == indices:
+        inOrder.add(word)
+</code></pre>
+
+which results in: <code>{"ABSTEMIOUS", "ABSTEMIOUSLY", "ABSTENTIOUS", "ARSENIOUS", "FACETIOUS", "FACETIOUSLY"}</code>. As a bonus, we got two words with all vowels, including <code>Y</code> in order!
+<br /><br />
+This is of course, just one small section of stuff found when playing with words and letters, and having something quick and easy, like Python, to manipulate them. There are various other attributes to look at, or fun things to graph, but I'll save those <code>DOCUMENTATIONS</code> for another post.
