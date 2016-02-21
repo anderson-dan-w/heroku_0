@@ -39,6 +39,9 @@
     .jumbotron .lang-logo img {
         max-width: 100%
     }
+    #footer {
+        padding-bottom: 2%;
+    }
   </style>
   {% block cssfiles %}{% endblock %}
 </head>
@@ -62,6 +65,8 @@
 </nav>
 
 {% block content %}{% endblock %}
-
+{% block footer %}
+<div id="footer"></div>
+{% endblock %}
 </body>
 </html>
