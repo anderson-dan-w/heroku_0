@@ -1,0 +1,59 @@
+#title The Hawthorne Effect
+#subtitle or, obligtory eponymous post
+#tags psychology self-reference
+#published 2016-03-02 20:55
+#lastEdit 2016-03-02 22:13
+A few people now have said to me "wow, what an interesting, eye-catching title
+for your blog. I bet it means something deep and smart, because you're
+obviously so intelligent" or things similar. Though I guess if we are going
+for truth and honesty, rather than complete fiction, the quote would be more
+along the lines of "I don't get it" or "I have never heard of your blog".
+
+Besides the aural ambiguity of <code>in.sight.few.languish</code>, which could be
+either <code>insightful language</code> or <code>insightful anguish</code>, there is an actual meaning
+to the phrase I chose. It's a veiled reference to the <a href="http://en.wikipedia.org/wiki/Hawthorne_effect">Hawthorne effect</a>, which
+was initially a pretty boring factory performance study that ended up yielding
+an interesting psychological point, once it was finally discovered. 
+
+Here's what went down:
+In the 1920s, some factory owners told the employees they were bringing in an
+outside group to do some measurement and analytics on how productive the
+workforce was being, and to see what they could do to improve the situation.
+As the story goes, no matter what the experimenters varied, productivity
+always increased. Turn the lights a little brighter? More productive. Turn the
+lights less bright? More productive. More frequent, shorter breaks? Less
+frequent, longer breaks? Both more productive.
+
+Now, you could just look at that data and think "wow, what a TERRIBLE company,
+they managed to pick the absolutely least-productive settings, across the
+board" and be done with it, and without any further data, it might be hard to
+convincingly argue against such a conclusion.
+
+The real kicker though, was that once the experiementers reported their
+results (presumably scratching their heads), and left, the productivity rates
+went abruptly down, back to initial levels. Now, nothing the management did
+seemed to have any serious effect on the workers' productivity. 
+
+It was eventually realized (by a psychologist by the name of Landsberger, in the
+1950s, when reviewing this work) that the real changes in productivity had
+little to do with the lighting or the breaks in the workday, but had everything
+to do with the fact that the employees knew they were being watched. Since the
+employees felt like someone was taking an interest in their work, they felt
+more important and therefore performed better. While being watched (or one
+might say <code>"in sight"</code>), not many (<code>"few"</code>) of them slacked off (<code>"languished"</code>).
+
+Some corollaries to the Hawthorne effect are the <a href="https://en.wikipedia.org/wiki/golem_effect">golem effect</a>, and the
+<a href="https://en.wikipedia.org/wiki/Pygmalion_effect">Pygmalion effect</a>, and they have some particularly far-reaching and important
+implications. These complementary effects suggest that people tend to perform
+better or worse in line with the expectations given to them. For the golem
+effect, being presented with lower expectations leads to a decrease in
+performance; the Pygmalion effect shows that those given high expectations tend
+to perform better than they do on average.
+
+So, why exactly would I pick a factory experiment from the 1920s as the
+title of my blog? Because it is supposed to directly represent my motivating
+factors for continuing to post: if I feel like there are people out there,
+reading my blog, interested in what I have to say, I'll be more likely to
+post regularly and to produce interesting thoughts. Now, there are probably
+on the order of a few thousand things wrong with these assumptions, but I'll
+leave those for another post.
