@@ -1,0 +1,162 @@
+# Graver Manacles (or, Clever Anagrams)
+
+## Figure out an efficient way to find anagrams
+
+Still thinking of a clever/engaging intro, such as: "In a bizarre computer
+quirk, an employee was trying to shuffle their music, but instead hit the
+shuffle button in their text document (who invented the shuffle-text function
+and why?!). It managed to preserve spaces, so it's only a matter of each word
+being scrambled, much like the Daily Jumble in many newspapers.
+
+It's your job to try to unscramble as many words as possible, or to at least
+provide all the valid options, since some jumbles can unscramble into multiple
+valid words.
+{code} AMET {code} could anagram into {code} TEAM, MEAT, TAME {code} or more.
+
+For this task, you can assume you have a collection (of any structure you want)
+of all valid words, stored in some variable {code} WORDS {code}, and to keep
+things simpler, let's go ahead and assume all the letters of every word are
+capitalized, and strictly alphabetic (no numb3rs, non-hyphens nor attached
+punctuation.) [[ see what I did there? ]]
+
+How might you go about it?
+
+First attempt:
+The most direct way, as usual, is brute force - given a collection of letters,
+we can try every combination (more specifically, permutation) of the input,
+and check each one to see if it's in our <strike>list</strike> set of valid
+words. [[ insert some code ]]
+
+If you try running a few examples of this, however, two issues may quickly
+become apparent, one much more problematic than the other.
+
+The minor issue is, given that we are doing as simple a brute force search as
+possible, and we're returning a list, we may get some repeats (bonus points if
+you can mathematically prove how many repeats we get). For example, given the
+scramble "ESTERT", we get 4 **unique** answers
+( 'RETEST', 'SETTER', 'STREET', 'TESTER' ), but we also see that each answer
+is repeated 4 times. That just makes it harder for someone to sift through the
+document later and pick the right word, because now it appears that there's
+16 options, rather than 4.
+
+The much more important issue, as you may have guessed, is how long this takes,
+especially noticeable on larger words. In fact, I don't recommend running this
+on anything more than 10 letters long - depending on your coding implementation,
+and your computer, it can start to take some serious time (10 letters took 0.5
+seconds for me using itertools, and 4 seconds using my hand-rolled code). And if
+I were to add an eleventh letter, it would take roughly 11x longer! The issue
+is that we are examining every permutation of the letters, which is O(n!) and
+factorial time is usually not your friend, especially with lots of calculations 
+and/or scaling.
+
+## So what can we do?
+
+One helpful thing to consider is: let's look at how many possible *solutions*
+there might in our search space. Given my (very-much-truncated) word list above,
+we see that there is only one 9-letter word, "INTERVIEW". Yet, if we were to
+examine the jumble "RINWTEIEV", we would need to check 9! (362,880) different
+permutations, all to see if this corresponds to our only 9-letter word.
+
+If we had some intermediate representation for these words, we could try to
+"meet in the middle", and not do factorial-sized operations. Let's consider for
+a minute what characteristics we find interesting about anagrams - for a given
+collection of letters, some number of permutations are valid words. If we can
+find some canonical collection or representation, that doesn't vary based on
+the *placement* of the letters, perhaps we can change our search space.
+
+One of the first ideas that pops to mind, when looking for a canonical
+representation, is sorting. [[ possible detour about using set() or Counter(),
+and why they fail or are ungainly, at least in Python ]]. I know, I know, I just
+said that the representation shouldn't rely on the placement, but it's the
+simplest way to get consistent results from our jumbled input. For example:
+sorted("INTERVIEW") and sorted("RINWTEIEV") both yield "EEIINRTVW".
+
+Now, the most direct (but maybe not most time-efficient) way to use this fact
+is to compare each sorted-jumble to each sorted-valid-word, and pull out the
+ones that match:
+key = sorted(jumble)
+for word in words:
+    if len(word) != len(key):
+        continue
+    if sorted(word) == key:
+        print(word)
+
+We've taken our O(n!) solution and changed it to be O(m n lg n). Whoa, where'd
+all that come from? Is that honestly better than n!, because it's hard to tell
+(and in fact, it may not be; it depends on the characteristics of your data).
+Well, we altered our algorithm to look at every word in our word-list, or
+a minor optimization - look at every word of the same length as our jumble, so
+I'm calling the number of words in our word-list m. Then, for each of these
+words (and our jumble, though that falls out in big-O), we need to sort the
+letters to come up with a canonical representation, which takes on average,
+assuming a reasonably-implemented sorting function, O(n lg n).
+Bonus: can you come up with an O(n) function that creates a canonical
+representation?
+
+The savings are very clear in certain aspects of this example dataset -
+given a 9-letter jumble,
+we need to perform 2 9-item sorts (the jumble, and the word in our word list)
+and a simple string-equality check (which adds an O(n) pass through the data,
+but again, that comes out in the wash, since we are already at O(n lg n) ).
+For an 11-letter jumble, we can perform *practically no work at all* - we don't
+have any 11-letter words in our word-list, so we can just return some message
+saying "Hey, we couldn't find anything; this one needs to be examined by hand"
+(maybe it's a proper noun, or some frankenword that isn't yet accepted, but
+might be understood/guessed in context) [[ see what I did there? ]]
+
+
+For some of the smaller words, however, it may not even be a benefit: for 'AMET',
+we perform 6 4-item sorts (5 on word-list, and our jumble) and 5 comparisons,
+compared to the brute-force factorial solution of examining all 24 (4!)
+permutations. And if we had a larger word-list - the ones I have used for other
+problem sets have over 4000 4-letter words - it seems like we are wasting quite
+a bit of time.
+
+One simple improvement we can make in the context of the original problem is
+to only sort the words in our word-list exactly once, rather than for every
+new jumble, and save that off somewhere useful to act as a look-up:
+ANAGRAMS = {}
+for word in WORDS:
+    key = make_key(word)
+    if key in ANAGRAMS:
+        ANAGRAMS[key].append(word)
+    else:
+        ANAGRAMS[key] = [word]
+
+Now, we performed all of our O(m n lg n) work upfront, and are taking up
+O(m n) space in our precomputed dictionary of anagrams, but each jumble
+operation is a mere O(1) dictionary look-up:
+key = make_key(jumble)
+return ANAGRAMS[key] if key in ANAGRAMS else None
+
+To keep the solution from getting over-engineered, or too involved for
+an interview, we can stop here. An argument could be made that the savings we
+realize from not doing factorial operations on our 11-letter frankenword far
+overshadow the wastefulness on smaller words - a single 11-letter word, using
+my hand-rolled permutation generator (and on my computer, etc.) takes almost
+a minute, while sorting all 4-letter words (remember, we only need to do this
+once) takes less than a tenth of a second (and takes less than a second to sort
+all the words of all lengths in my word-list, almost 200,000 words).
+
+## What we learned:
+O(n!) solutions may feel intuitive, and in some very specific use cases might
+be acceptable, but for an interview question, for a scalable, repetitive
+process, factorial is probably not going to be the overall winner.
+
+Sometimes, it helps to reconsider the problem from another angle - in this case,
+the helpful insight was that our *actual* search space was the word-list, which
+is vastly smaller than the *possible* search space of all letter combinations.
+
+Some problems are best-served by making the outputs and the inputs meet
+somewhere in the middle. We were able to develop a more efficient algorithm when
+we decided to find a canonical representation, and do the bulk of our work
+making the valid words fit this intermediary, instead of forcing every input
+to exactly match the outputs.
+
+Lastly, we saw that there can be time-memory trade offs when dealing with some
+of these structures - if we have O(m n) space to hold our dictionary of anagrams
+then we reduce our *search* time to O(1) per jumble. Notably, our
+pre-computation was O(m n lg n) time still; the benefit comes from the re-use:
+we won't need to re-sort all 4-letter words every time we encounter a 4-letter
+jumble, so on a shuffled document of any moderate size, this will start to save
+lots of repeated calculations.
