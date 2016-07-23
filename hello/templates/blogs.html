@@ -54,6 +54,32 @@
         {% endif %}
     </div>
 </div>
+{% else %}
+<div class="container">
+    <div class="row">
+        <h2>Recent Posts</h2>
+        {% for d in recentSnippets %}
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                <a href="/blogs/{{ d.blog_id}}">{{ d.title }}</a>
+                <span class="label label-warning pull-right">
+                    Published: {{ d.published }}
+                </span>
+            </div>
+            <div class="panel-content">
+                {% autoescape off %}{{ d.text }}{% endautoescape %}
+            </div>
+            <div class="panel-footer">
+                <div class="row">
+            {% for tag in d.tags %}
+                <button type="button" class="btn btn-sm btn-info pull-right">{{ tag }}</button>
+            {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
 {% endif %}{# end if blogIndex #}
 
 <script>

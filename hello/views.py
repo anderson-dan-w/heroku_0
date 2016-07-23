@@ -23,8 +23,13 @@ def db(request):
     greetings = Greeting.objects.all()
     return render(request, 'db.html', {'greetings': greetings})
 
+def aboutme(request):
+    return render(request, 'aboutme.html')
+
 def blogs(request):
-    return render(request, "blogs.html")
+    ctx = {}
+    ctx["recentSnippets"] = blogParser.getRecentSnippets()
+    return render(request, "blogs.html", ctx)
 
 def nblog(request, blogIndex=-1):
     ctx = dict(blogIndex=blogIndex, text="empty text")
