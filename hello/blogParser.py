@@ -1,5 +1,7 @@
 import os
 
+BLOG_DIR = os.path.join(os.path.dirname(__file__), "blogs")
+
 LINE_BREAK = "<br />"
 
 ## keywords in blogs that should be stripped and handled differently
@@ -34,16 +36,34 @@ def processKeywords(lines):
             blogDict[k] = fn(blogDict[k])
     return blogDict
 
-def addLineBreaks(lines, blogDict):
-    lines = (l if l else LINE_BREAK*2 for l in lines)
+def addLineBreaks(lines, blogDict, nlines=None):
+    lines = [l if l else LINE_BREAK*2 for l in lines]
+    if nlines is not None:
+        lines = lines[:nlines]
     blogDict["text"] = "\n".join(lines)
 
-def parseBlog(fname):
+def parseBlog(fname, nlines=None):
     if not os.path.exists(fname):
         return {}
+    print(fname)
     with open(fname) as fh:
         lines = fh.read().split("\n")
-    d = processKeywords(lines)
-    addLineBreaks(lines, d)
+    d = {"blog_id": os.path.splitext(os.path.basename(fname))[0]}
+    d.update(processKeywords(lines))
+    addLineBreaks(lines, d, nlines)
     return d
+
+def getSnippet(fname):
+    return parseBlog(fname, 1)
+
+def getRecentSnippets():
+    nrecent = 3
+    snippets = []
+    for fname in os.listdir(BLOG_DIR):
+        if not fname.endswith(".txt"):
+            continue
+        snippet = getSnippet(os.path.join(BLOG_DIR, fname))
+        snippets.append(snippet)
+    snippets.sort(key=lambda d:d['published'], reverse=True)
+    return snippets[:nrecent]
 
