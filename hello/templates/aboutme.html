@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+<div class="container">
+    <div class="row">
+        Hallo, i M dan..
+    </div>
+</div>
+
+<script>
+$("#home")[0].classList.remove("active");
+$("#about")[0].classList.add("active");
+</script>
+
+{% endblock %}
