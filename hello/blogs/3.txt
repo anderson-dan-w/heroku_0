@@ -1,27 +1,19 @@
-# Graver Manacles (or, Clever Anagrams)
+#title Graver Manacles
+#subtitle or, Clever Anagrams
+#tags programming letters words
+#published 2016-07-22 14:00
+#lastEdit 2016-07-22 14:15
+Still thinking of a clever/engaging intro, such as: "In a bizarre computer quirk, an employee was trying to shuffle their music, but instead hit the shuffle button in their text document (who invented the shuffle-text function and why?!). It managed to preserve spaces, so it's only a matter of each word being scrambled, much like the Daily Jumble in many newspapers."
 
-## Figure out an efficient way to find anagrams
-
-Still thinking of a clever/engaging intro, such as: "In a bizarre computer
-quirk, an employee was trying to shuffle their music, but instead hit the
-shuffle button in their text document (who invented the shuffle-text function
-and why?!). It managed to preserve spaces, so it's only a matter of each word
-being scrambled, much like the Daily Jumble in many newspapers.
-
-It's your job to try to unscramble as many words as possible, or to at least
-provide all the valid options, since some jumbles can unscramble into multiple
-valid words.
-{code} AMET {code} could anagram into {code} TEAM, MEAT, TAME {code} or more.
+It's your job to try to unscramble as many words as possible, or to at least provide all the valid options, since some jumbles can unscramble into multiple valid words. <code> AMET </code> could anagram into <code> TEAM, MEAT, TAME </code> or more.
 
 For this task, you can assume you have a collection (of any structure you want)
-of all valid words, stored in some variable {code} WORDS {code}, and to keep
+of all valid words, stored in some variable <code> WORDS </code>, and to keep
 things simpler, let's go ahead and assume all the letters of every word are
-capitalized, and strictly alphabetic (no numb3rs, non-hyphens nor attached
-punctuation.) [[ see what I did there? ]]
+capitalized, and strictly alphabetic (no <code>numb3rs</code>,
+<code>hyphen-words</code> or attached <code>punctuation.</code>)
 
-How might you go about it?
-
-First attempt:
+<h3>First (intentiaionally naive) attempt</h3>
 The most direct way, as usual, is brute force - given a collection of letters,
 we can try every combination (more specifically, permutation) of the input,
 and check each one to see if it's in our <strike>list</strike> set of valid

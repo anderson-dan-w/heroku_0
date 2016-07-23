@@ -1,3 +1,4 @@
 #title Not a Real Post
 #tags comp-sci
+#published 2016-02-02 02:02
 Why would you go to post 0? Who counts like that? This is blog posting, not computer science (though some of the blogs are <i>about</i> computer science)

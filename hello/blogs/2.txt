@@ -3,17 +3,9 @@
 #tags psychology self-reference
 #published 2016-03-02 20:55
 #lastEdit 2016-03-02 22:13
-A few people now have said to me "wow, what an interesting, eye-catching title
-for your blog. I bet it means something deep and smart, because you're
-obviously so intelligent" or things similar. Though I guess if we are going
-for truth and honesty, rather than complete fiction, the quote would be more
-along the lines of "I don't get it" or "I have never heard of your blog".
+A few people now have said to me "wow, what an interesting, eye-catching title for your blog. I bet it means something deep and smart, because you're obviously so intelligent" or things similar. Though I guess if we are going for truth and honesty, rather than complete fiction, the quote would be more along the lines of "I don't get it" or "I have never heard of your blog".
 
-Besides the aural ambiguity of <code>in.sight.few.languish</code>, which could be
-either <code>insightful language</code> or <code>insightful anguish</code>, there is an actual meaning
-to the phrase I chose. It's a veiled reference to the <a href="http://en.wikipedia.org/wiki/Hawthorne_effect">Hawthorne effect</a>, which
-was initially a pretty boring factory performance study that ended up yielding
-an interesting psychological point, once it was finally discovered. 
+Besides the aural ambiguity of <code>in.sight.few.languish</code>, which could be either <code>insightful language</code> or <code>insightful anguish</code>, there is an actual meaning to the phrase I chose. It's a veiled reference to the <a href="http://en.wikipedia.org/wiki/Hawthorne_effect">Hawthorne effect</a>, which was initially a pretty boring factory performance study that ended up yielding an interesting psychological point, once it was finally discovered. 
 
 Here's what went down:
 In the 1920s, some factory owners told the employees they were bringing in an
