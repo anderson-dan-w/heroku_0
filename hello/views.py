@@ -26,6 +26,9 @@ def db(request):
 def aboutme(request):
     return render(request, 'aboutme.html')
 
+def books(request):
+    return render(request, 'books.html')
+
 def blogs(request):
     ctx = {}
     ctx["recentSnippets"] = blogParser.getRecentSnippets()
