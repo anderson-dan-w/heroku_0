@@ -29,6 +29,9 @@ def aboutme(request):
 def books(request):
     return render(request, 'books.html')
 
+def bookclub(request):
+    return render(request, 'bookclub.html')
+
 def blogs(request):
     ctx = {}
     ctx["recentSnippets"] = blogParser.getRecentSnippets()
