@@ -2,7 +2,7 @@
 #subtitle or, Clever Anagrams
 #tags programming letters words
 #published 2016-07-22 14:00
-#lastEdit 2016-08-12 19:54
+#lastEdit 2016-08-21 16:08
 So, if you've ever met me, and accidentally gotten me started talking about programming, odds are I've mentioned my <strike>unhealthy obsession</strike> pet project of <code>anagrams</code>. I find it interesting because, like any good programming interview question, it has a somewhat obvious solution, which has a horrendous runtime when taken far enough; and it has more clever solutions that improve runtime drastically. What follows is an exploration of how to move from that initial idea to something more practical.
 
 That being said, I have found enough wrinkles and extensions to the problem so that I don't think there's a single best solution, but rather a few different avenues to explore, each of which is interesting in its own way (at least to me). 
@@ -14,7 +14,7 @@ The most direct way, as usual, is brute force - given a collection of letters,
 we can try every combination (more technically, permutation) of the input,
 and check each one to see if it's in <code>WORDS</code>.
 
-Let's start from actual scratch, and roll our own permutation maker - maybe we are in a language that doesn't ahve permutation built-in to a standard library, and while I'm showing Python code, it shouldn't be too hard to generalize to other (procedural) languages.
+Let's start from actual scratch, and roll our own permutation maker - maybe we are in a language that doesn't have permutation built-in to a standard library, and while I'm showing Python code, it shouldn't be too hard to generalize to other (procedural) languages.
 <pre><code class="python">def next_permutation(letters):
     ## base-case for recursive algorithm
     if not letters:
@@ -61,144 +61,126 @@ However, start running this with a larger word/jumble, say <code>WRINKLE</code>,
     </div><!-- end panel-body-->
 </div><!-- end panel-->
 
-If you try running a few examples of this, however, two issues may quickly
-become apparent, one much more problematic than the other.
+Since we are examining every permutation of a given set of letters, it's a factorial algorithm. How bad could it really be? Well, let's look at our actual scenario: there are <code>7!</code>, or <code>5_040</code>, different options to scan through, checking to see if any of them is contained in <code>WORDS</code>. Computers are fast though, so maybe that's not too much of an issue, and more importantly, maybe that <b>is</b> the correct way to run this algorithm - after all, given my wordset (from <a href="https://github.com/anderson-dan-w/Words/tree/master/wordplay/texts">my github</a>), there are <code>24_029</code> unique 7-letter words. Maybe it does make more sense just to iterate through all the options of <code>WRINKLE</code>.
 
-The minor issue is, given that we are doing as simple a brute force search as
-possible, and we're returning a list, we may get some repeats (bonus points if
-you can mathematically prove how many repeats we get). For example, given the
-scramble "ESTERT", we get 4 **unique** answers
-( 'RETEST', 'SETTER', 'STREET', 'TESTER' ), but we also see that each answer
-is repeated 4 times. That just makes it harder for someone to sift through the
-document later and pick the right word, because now it appears that there's
-16 options, rather than 4.
+But does it scale well? Here's a quick chart that hopefully shows the issue.
 
-The much more important issue, as you may have guessed, is how long this takes,
-especially noticeable on larger words. In fact, I don't recommend running this
-on anything more than 10 letters long - depending on your coding implementation,
-and your computer, it can start to take some serious time (10 letters took 0.5
-seconds for me using itertools, and 4 seconds using my hand-rolled code). And if
-I were to add an eleventh letter, it would take roughly 11x longer! The issue
-is that we are examining every permutation of the letters, which is O(n!) and
-factorial time is usually not your friend, especially with lots of calculations 
-and/or scaling.
+<div>
+    <a href="https://plot.ly/~anderson.dan.w/23/" target="_blank" title="factorial vs word-count" style="display: block; text-align: center;"><img src="https://plot.ly/~anderson.dan.w/23.png" alt="factorial vs word-count" style="max-width: 100%;width: 600px;"  width="600" onerror="this.onerror=null;this.src='https://plot.ly/404.png';" /></a>
+    <script data-plotly="anderson.dan.w:23"  src="https://plot.ly/embed.js" async></script>
+</div>
+and since that is kinda hard to see what's going on, let's make the y-axis a log scale. 
 
-## So what can we do?
+<div>
+    <a href="https://plot.ly/~anderson.dan.w/25/" target="_blank" title="factorial vs word-count, log" style="display: block; text-align: center;"><img src="https://plot.ly/~anderson.dan.w/25.png" alt="factorial vs word-count, log" style="max-width: 100%;width: 600px;"  width="600" onerror="this.onerror=null;this.src='https://plot.ly/404.png';" /></a>
+    <script data-plotly="anderson.dan.w:25"  src="https://plot.ly/embed.js" async></script>
+</div>
 
-One helpful thing to consider is: let's look at how many possible *solutions*
-there might in our search space. Given my (very-much-truncated) word list above,
-we see that there is only one 9-letter word, "INTERVIEW". Yet, if we were to
-examine the jumble "RINWTEIEV", we would need to check 9! (362,880) different
-permutations, all to see if this corresponds to our only 9-letter word.
+As we can see, for short words, it might be reasonable to use the factorial approach, but for longer words, it doesn't really make sense to iterate through millions and millions of options, just to compare against the few thousand possibilities.
 
-If we had some intermediate representation for these words, we could try to
-"meet in the middle", and not do factorial-sized operations. Let's consider for
-a minute what characteristics we find interesting about anagrams - for a given
-collection of letters, some number of permutations are valid words. If we can
-find some canonical collection or representation, that doesn't vary based on
-the *placement* of the letters, perhaps we can change our search space.
+<h3>Now what?</h3>
 
-One of the first ideas that pops to mind, when looking for a canonical
-representation, is sorting. [[ possible detour about using set() or Counter(),
-and why they fail or are ungainly, at least in Python ]]. I know, I know, I just
-said that the representation shouldn't rely on the placement, but it's the
-simplest way to get consistent results from our jumbled input. For example:
-sorted("INTERVIEW") and sorted("RINWTEIEV") both yield "EEIINRTVW".
+If we had some intermediate representation for these words, we could try to "meet in the middle", and not do factorial-sized operations. Let's consider for a minute what characteristics we find interesting about anagrams - for a given collection of letters, some number of permutations are valid words. If we can find some canonical collection or representation, that doesn't vary based on the <i>placement</i> of the letters, perhaps we can change our search space.
+
+There are lots of different, valid ways to get a canonical representation of but the first that springs to my mind is through sorting. I know, I know, I just said we <i>shouldn't</i> rely on placement, but this is different: we don't care what order the letters were in beforehand, when they made up a word, we just want to get them into some consistent form, and alphabetizing them seems like a natural, straightforward way to do that.
+
+<div class="panel panel-warning">
+    <div class="panel-heading">
+    Detour about <code>set()</code> and <code>collections.Counter()</code>
+        <button type="button" class = "btn btn-default" id="set_counter_toggle">show/hide</button>
+    </div>
+    <div class="panel-body" id="set_counter">
+    Some other early thoughts about how to get a consistent, canonical representation might include <code>set()</code>. However, we lose some important information when we make a <code>set()</code> of something, namely the repetition. An example makes it clear:
+<pre><code class="python">set("REST"), set("TREES", set("STREET")
+    ## {'E', 'R', 'S', 'T'}, {'E', 'R', 'S', 'T'}, {'E', 'R', 'S', 'T'}
+set("REST-") == set("SETTER-TREES-STEER") ## True</code></pre>
+    We no longer know how many times each letter appeared, just that it appeared, so we will get spurious results. Alright, we might say, let's keep track of the counts, like in a dictionary. Python provides a built-in (well, in a package in the standard library, at least) to make this super-simple:
+<pre><code class="python">from collections import Counter
+Counter("REST")
+  ## {'E': 1, 'R': 1, 'S': 1, 'T': 1}
+Counter("TREES")
+  ## {'E': 2, 'R': 1, 'S': 1, 'T': 1}
+Counter("STREET")
+  ## {'E': 2, 'R': 1, 'S': 1, 'T': 2}
+Counter("REST") == Counter("STREET") ## False</code></pre>
+    The issue with <code>Counter</code> is less clear, but in a few moments, we will see that it's helpful to make our representation a key in a dictionary, and dictionaries aren't good dictionary keys - they are unhashable as-is (you can alter them) and there isn't a built-in <code>frozendict</code> and that just seems like a lot of hassle anyway - take a jumble, create the <code>Counter</code>, convert that to a <code>frozendict</code>, then add it to some larger dictionary.
+    </div> <!-- end panel-body -->
+</div> <!-- end panel -->
+
+So, let's make a simple function to create our canonical representation:
+<pre><code class="python">def canonicalize(letters):
+    ## returning a str, besides being more natural, will prove beneficial
+    return "".join(sorted(letters))</code></pre>
 
 Now, the most direct (but maybe not most time-efficient) way to use this fact
 is to compare each sorted-jumble to each sorted-valid-word, and pull out the
 ones that match:
-key = sorted(jumble)
-for word in words:
-    if len(word) != len(key):
-        continue
-    if sorted(word) == key:
-        print(word)
-
-We've taken our O(n!) solution and changed it to be O(m n lg n). Whoa, where'd
-all that come from? Is that honestly better than n!, because it's hard to tell
-(and in fact, it may not be; it depends on the characteristics of your data).
-Well, we altered our algorithm to look at every word in our word-list, or
-a minor optimization - look at every word of the same length as our jumble, so
-I'm calling the number of words in our word-list m. Then, for each of these
-words (and our jumble, though that falls out in big-O), we need to sort the
-letters to come up with a canonical representation, which takes on average,
-assuming a reasonably-implemented sorting function, O(n lg n).
-Bonus: can you come up with an O(n) function that creates a canonical
-representation?
-
-The savings are very clear in certain aspects of this example dataset -
-given a 9-letter jumble,
-we need to perform 2 9-item sorts (the jumble, and the word in our word list)
-and a simple string-equality check (which adds an O(n) pass through the data,
-but again, that comes out in the wash, since we are already at O(n lg n) ).
-For an 11-letter jumble, we can perform *practically no work at all* - we don't
-have any 11-letter words in our word-list, so we can just return some message
-saying "Hey, we couldn't find anything; this one needs to be examined by hand"
-(maybe it's a proper noun, or some frankenword that isn't yet accepted, but
-might be understood/guessed in context) [[ see what I did there? ]]
-
-
-For some of the smaller words, however, it may not even be a benefit: for 'AMET',
-we perform 6 4-item sorts (5 on word-list, and our jumble) and 5 comparisons,
-compared to the brute-force factorial solution of examining all 24 (4!)
-permutations. And if we had a larger word-list - the ones I have used for other
-problem sets have over 4000 4-letter words - it seems like we are wasting quite
-a bit of time.
-
-One simple improvement we can make in the context of the original problem is
-to only sort the words in our word-list exactly once, rather than for every
-new jumble, and save that off somewhere useful to act as a look-up:
-ANAGRAMS = {}
+<pre><code class="python">jumble = "ATEM"
+sorted_jumble = canonicalize(jumble)
 for word in WORDS:
-    key = make_key(word)
-    if key in ANAGRAMS:
-        ANAGRAMS[key].append(word)
-    else:
-        ANAGRAMS[key] = [word]
+    ## don't waste time on different length words
+    if len(word) != len(sorted_jumble):
+        continue
+    if canonicalize(word) == sorted_jumble:
+        print(word)
+</code></pre>
 
-Now, we performed all of our O(m n lg n) work upfront, and are taking up
-O(m n) space in our precomputed dictionary of anagrams, but each jumble
-operation is a mere O(1) dictionary look-up:
-key = make_key(jumble)
-return ANAGRAMS[key] if key in ANAGRAMS else None
+We've taken our <code>O(n!)</code> solution and changed it to <code>O(m n lg n)</code>. Whoa, where'd all that come from? Is that honestly better than n!, because it's hard to tell (and in fact, it may not be; it depends on the characteristics of your data). Well, we altered our algorithm to look at every word in our word-list (minor optimization - look at every word of the same length as our jumble), so I'm calling the number of words in our word-list <code>m</code>. Then, for each of these words (and our jumble, though that falls out in big-O), we need to sort the letters to come up with the canonical representation, which takes on average, assuming a reasonably-implemented sorting function, <code>O(n lg n)</code>.
 
-To keep the solution from getting over-engineered, or too involved for
-an interview, we can stop here. An argument could be made that the savings we
-realize from not doing factorial operations on our 11-letter frankenword far
-overshadow the wastefulness on smaller words - a single 11-letter word, using
-my hand-rolled permutation generator (and on my computer, etc.) takes almost
-a minute, while sorting all 4-letter words (remember, we only need to do this
-once) takes less than a tenth of a second (and takes less than a second to sort
-all the words of all lengths in my word-list, almost 200,000 words).
+<div class="panel panel-warning">
+    <div class="panel-heading">Bonus
+        <button type="button" class="btn btn-default" id="bonus_toggle">show/hide</button>
+    </div>
+    <div class="panel-body" id="bonus">There's an <code>O(n)</code> canonicalizing function, rather than <code>O(n lg n)</code> - more on that in another post, perhaps.</div>
+</div> <!-- end panel -->
+The savings get pretty clear as we push further out into word-length, since the naive algorithm scaled with word-length, while this new one scales with number of words in our dictionary, which for me at least, starts decreasing pretty quickly. For a 10-letter word, we do ~<code>22_000</code> sorts, rather than 3.5 million permutations; for a 15-letter word, we do ~<code>3_000</code> sorts, rather than 1 trillion permutations; and for a 26-letter jumble, we do <code>0</code> sorts, since there are no 26-letter words in my <code>WORDS</code>, rather than 100 trillion trillion (~2<sup>88</sup>) permutations. Even if we could do one permute-and-check per nanosecond, this would still take 12 billion years... 
 
-## What we learned:
-O(n!) solutions may feel intuitive, and in some very specific use cases might
-be acceptable, but for an interview question, for a scalable, repetitive
-process, factorial is probably not going to be the overall winner.
+<h3>Multiple Jumbles</h3>
+Adding slightly to the original problem, which just mentioned figuring out if one jumble was an anagram, what if we had many jumbles to anagramize? Sure, we could just loop over each input jumble, and then go sorting all the relevant words in our word-list, but this could get pretty wasteful pretty quickly - we will be doing the same sorting over and over, everytime we encounter another jumble with the same length.
 
-Sometimes, it helps to reconsider the problem from another angle - in this case,
-the helpful insight was that our *actual* search space was the word-list, which
-is vastly smaller than the *possible* search space of all letter combinations.
+One simple improvement we can make on the problem is to only sort the words in our word-list exactly once, rather than for every new jumble, and save that off somewhere useful to act as a look-up. This is when its useful that our representation is a <code>str</code> rather than a <code>list</code> - we can use <code>str</code>s as keys in a dictionary:
+<pre><code class="python">def generate_anagram_lookup(WORDS):
+    ANAGRAMS = {}
+    for word in WORDS:
+        key = canonicalize(word)
+        if key in ANAGRAMS:
+            ANAGRAMS[key].append(word)
+        else:
+            ANAGRAMS[key] = [word]
+ ## or, since it's python:
+from collections import defaultdict
+def generate_anagram_lookup(WORDS):
+    for word in WORDS:
+        key = canonicalize(word)
+        ANAGRAMS[key].append(word)</code></pre>
+Now, we performed all of our <code>O(m n lg n)</code> work upfront, and are taking up <code>O(m n)</code> space in our precomputed dictionary of anagrams, but each jumble operation is a mere <code>O(1)</code> dictionary look-up:
+<pre><code class="python">jumble_key = canonicalize(jumble)
+anagrams = ANAGRAMS[jumble_key]</code></pre>
 
-Some problems are best-served by making the outputs and the inputs meet
-somewhere in the middle. We were able to develop a more efficient algorithm when
-we decided to find a canonical representation, and do the bulk of our work
-making the valid words fit this intermediary, instead of forcing every input
-to exactly match the outputs.
-
-Lastly, we saw that there can be time-memory trade offs when dealing with some
-of these structures - if we have O(m n) space to hold our dictionary of anagrams
-then we reduce our *search* time to O(1) per jumble. Notably, our
-pre-computation was O(m n lg n) time still; the benefit comes from the re-use:
-we won't need to re-sort all 4-letter words every time we encounter a 4-letter
-jumble, so on a shuffled document of any moderate size, this will start to save
-lots of repeated calculations.
-
+<h3>What we learned:</h3>
+<ul>
+<li><code>O(n!)</code> solutions may feel intuitive, and in some very specific use cases (short words, in this case) might be reasonable, but for a scalable, repetitive process, factorial is probably not going to be the overall winner.</li>
+<li>Sometimes, it helps to reconsider the problem from another angle - in this case, the helpful insight was that our *actual* search space was the word-list, which is vastly smaller than the *possible* search space of all letter combinations.</li>
+<li>Some problems are best-served by making the outputs and the inputs meet somewhere in the middle. We were able to develop a more efficient algorithm when we decided to find a canonical representation, and do the bulk of our work making the valid words fit this intermediary, instead of forcing every input to exactly match the outputs.</li>
+<li>Lastly, we saw that there can be time-memory trade offs when dealing with some of these structures - if we have <code>O(m n)</code> space to hold our dictionary of anagrams then we reduce our *search* time to <code>O(1)</code> per jumble. Notably, our pre-computation was <code>O(m n lg n)</code> time still. The benefit comes from the re-use: we won't need to re-sort all 4-letter words every time we encounter a 4-letter jumble, so with a large list of jumbles, this will start to save lots of repeated calculations.</li>
+</ul>
 <script>
+// the massive wall of text for 7! permutations
 $("#anagram6toggle").click(function() {
     $("#anagram6").toggle("show");
 });
 // initially hidden
 $("#anagram6toggle").click();
+// set and counter detour
+$("#set_counter_toggle").click(function() {
+    $("#set_counter").toggle("show");
+});
+// initially hidden
+$("#set_counter_toggle").click();
+// bonus
+$("#bonus_toggle").click(function() {
+    $("#bonus").toggle("show");
+});
+// initially hidden
+$("#bonus_toggle").click();
 </script>
