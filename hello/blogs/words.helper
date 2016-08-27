@@ -1,0 +1,19 @@
+to eventually be a reference, since many programming posts will reference this without wanting to rewrite it explicitly, everytime
+
+On ubuntu, there may be /usr/share/dict/words but if not, you can check {{ my github repo }} for one or two vaguely reasonable (English) word files. The nice quality these have is that they contain one word per line. The simplest way to get what we want, which is again, a set() of all words, in case-insensitive form (wlg<hover: without loss of generality> CAPS). To keep things simple, let's assume no <code>numb3rs</code>, <code>hypehn-words</code> or attached <code>punctuation.</code>
+
+fname = "path to words file"
+WORDS = set()
+set.update(w.upper() for w in open(fname).read().split("\n") if w.isalpha())
+
+we add the isalpha check because I've seen dictionaries with 867-5309 and other such things - obviously if that's a case you're concerned about, alter as necessary.
+
+There are other ways to do it - maybe we can just ignore hypens in hypen-words. The line gets a little messier so let's break it apart:
+WORDS = set()
+for line in open(fname).read().split("\n"):
+    word = "".join(l for l in line if l.isalpha())
+    WORDS.add(word)
+
+or whatever
+
+
