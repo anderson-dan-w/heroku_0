@@ -45,7 +45,6 @@ def addLineBreaks(lines, blogDict, nlines=None):
 def parseBlog(fname, nlines=None):
     if not os.path.exists(fname):
         return {}
-    print(fname)
     with open(fname) as fh:
         lines = fh.read().split("\n")
     d = {"blog_id": os.path.splitext(os.path.basename(fname))[0]}
