@@ -1,0 +1,78 @@
+#title argparse tidbits
+#tags programming python
+#published 2017-01-17 22:00
+#lastEdit 2017-01-17 22:00
+I recently came across some trouble with Python's <code>argparse</code> module, and thought it might be informative. Granted, most of the trouble was with <em>me</em> misunderstanding things, but some of it was unintuitive, and it drove me crazy for the better half (well, worse half, thankfully) of a day.
+
+Let's set the scene: in a moderately-contrived scenario, I had a script/module/package (still don't know the difference, maybe that's part of the problem) that I wanted to run. All well and good, it's a proper git-repo, with a <code>src</code> directory containing a <code>main.py</code> file that has a <code>main</code> function. No arguments for <code>main</code> just yet, since the script is built in such a way that it doesn't <em>need</em> any arguments. "Who needs arguments these days?! Peasants."
+
+Now, turns out I don't just want to run this script willy-nilly, whenever I feel like it. I need rules and structure - this script must run once an hour. Part of it's <strike>over-engineering</strike> clever structure is that it can be <em>called</em> every hour, but only run the portions that it needs based on which hour it is - run X at 9am, run Y at 3pm, etc. So I need a cron-job, right?
+
+Well, I'm not on *nix, sadly. I'm on Mac, though, and it's better than I expected it to be! But, I'm on a Mac <em>laptop</em>, and I can't have this script failing to run every time I unplug or disconnect from the network. I need full connectivity - I need a server. We've got one - it's in Windows &lt;/sad-trombone&gt;.
+
+Ok, fine, I can figure out how to write a damn <code>.bat</code> and triple-escape/double-quote everything, and write incorrectly-highlighted-hardcodes like <code>C:\n-not-a-newline\r-not-a-carriage-return\battythe.bat</code>. My soul is cringing, I'm afraid for anyone to review my code lest they think I'm <em>ambivalent about</em> or, even worse, <strong>enjoy</strong> coding for Windows. I shudder at the thought.
+
+Now, finally, we start to see part of my problem - I don't want to have to sign in to the server, and navigate Windows command prompts (<code>gitbash</code> only helps so much...), and run <code>git pull origin master</code> every time I push a change locally, from my Mac laptop, i.e. an environment I can stomach. So, what I need is a a way for any changes I push to my <a href="http://github.com">github repo</a> to get picked up automatically, and integrated into the next scheduled running of my Windows batch file.
+
+<em>[Enter Abstraction, stage-left]</em>
+
+So, of course, I write a script for this. The goal is that my scheduled task will invoke this wrapper script, which will check out a fresh copy of the git-repo (woe unto them who check in a broken build on <code>origin master</code>), and then run <em>that</em>. Considering that I'm writing in Python, what might this look like?
+<pre><code class="python">## after pip install gitpython...
+from argparse import ArgumentParser
+from git import Repo
+ 
+REPO_BASE = "https://github.com/anderson-dan-w/affirmations.git"
+ 
+def main():
+    parser = ArgumentParser()
+    parser.add_argument("repo_name")
+    args = parser.parse_args()
+ 
+    ## etc. 
+</code></pre>
+Alright - finally, here's some <code>argparse</code>, maybe I'm getting to my point. Haha, just kidding, not even close.
+
+So, some of this code feels a little questionable - I need to munge <code>sys.path</code> to allow the "relative import" from that new repo to work. But, it gets the job done - I can use this to check out a current repo, and run whatever is in <code>src.main.main</code> (assuming, of course, that file structure/code exists).
+
+To add slightly to the confusion, I check this code into a separate <a href="https://github.com">git-repo</a>, so that I can (<em>manually</em> and with a heavy heart) check it out server-side, and use it as part of my batch script to kick off whatever jobs I need.
+
+In fact, the entire batch script is:
+<pre><code class="bash">python.exe \path\to\git-runner.py affirmations
+</code></pre>
+Life is still good, everything works - whenever I push changes to the actual repo I care about, they get picked up automatically next hour. Sure, whenever I change the <code>git-runner</code> script, I need to go on to the server to manually <code>git pull</code> it but that's rare enough that I can live with it.
+
+Or can I? Maybe, I could write that script in such a way that any new updates are at least compatible enough with existing code so as to be check-out-able by the existing codebase, such that it could bootstrap itself, checking out a fresh version of the helper script, i.e. itself, to then call the newer version of itself inside itself such that the new versi-<code>RuntimeError: 'maximum recursion depth exceeded'</code>
+
+Hmm, where was I? Right, right, so my helper-script checks out the repo-of-interest and runs <code>main()</code> with no arguments. Everything works, and I am happy. So, we're done, right?
+
+Let's add arguments to <code>main()</code>! How hard could it be...
+
+Alright, let's restructure to allow for <code>argparse</code> in my updated version of the repo, something like
+<pre><code class="python">from argparse import ArgumentParser
+ 
+def main():
+    parser = ArgumentParser()
+    parser.add_argument("-e", "--emphasize", action="store_true")
+    args = parser.parse_args()
+ 
+    affirm()
+    if args.emphasize:
+        print("No really, I mean it!")
+</code></pre>
+Makes sense, runs just fine when I test it at the command line with <code>python src/main.py --emphasize</code>. Cool, let's psuh this to github.
+
+Now, we need to update our batch script to incorporate the new argument:
+<pre><code class="bash">python.exe \path\to\git-runner.py affirmations --emphaisze
+</code></pre>
+and just wait an hour for some truly emphatic affirmations.
+
+...or not. What happened? Of course we don't <em>directly</em> know, because who knows where the stdout/stderr from Windows batch scripts lives on after its gone, but what I do know is I didn't get <em>any</em> affirmations, no less emphatic ones.
+
+I try manually running the batch script (so much for automation!) and get the output:
+<pre><code class="bash">git-runner.py: unrecognized option "--emphasize"
+</code></pre>
+Well, hmm. Ok, that kinda makes sense - we've got <code>argparse</code> inside <code>affirmations</code>, but we actually call it earlier, with <code>git-runner</code>. We don't want to get rid of either call to <code>argparse</code> so we need them both to work, but they've got to do it a little more harmoniously.
+
+The first thing that came to mind was to include a <code>subparser</code>, to somehow add <code>affirmations</code>' arguments into <code>git-runner</code>'s. Except, on second thought, that doesn't make any sense - we don't know which git-repo we're checking out until after we've already called <code>argparse</code> so there's no way we could figure out which subparser to add.
+
+Alright, well, what if we try to munge <code>sys.argv</code> to have the right arguments? It's not like we're adhering to any sane coding standards anyway - we're checking out from github, modifying <code>sys.path</code> and running whatever's there anyway. Let's go all out and mess with the system however we need, just to get it to work.
