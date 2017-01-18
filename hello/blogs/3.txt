@@ -149,6 +149,7 @@ One simple improvement we can make on the problem is to only sort the words in o
             ANAGRAMS[key] = [word]
  ## or, since it's python:
 from collections import defaultdict
+ANAGRAMS = defaultdict(list)
 def generate_anagram_lookup(WORDS):
     for word in WORDS:
         key = canonicalize(word)
