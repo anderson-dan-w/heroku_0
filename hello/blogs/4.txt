@@ -4,28 +4,39 @@
 #lastEdit 2016-10-25 2:35
 Not too sure where this post may go, but I feel like it's important to note confluences as they occur - two seemingly unrelated topics converge, sharing ideas and patterns, benefitting from each other and creating a unique perspective. What follows is free-form thoughts about how two books I'm concurrently reading - one about <code>chaos/fractals</code> and the other about <code>evolution</code> have started to overlap.
 
-<img src="/static/chaos-gleick.jpg">
-<img src="/static/darwin-dennett.jpg">
-
 <h2>Chaos</h2>
+<img src="/static/chaos-gleick.jpg">
+
 First, I'm reading <i>Chaos</i> by James Gleick, which discusses the relatively new field of chaos theory and Mandelbrotian fractals. Fractals are more than just pretty pictures (though they are mesmerizing) - they're actually interesting phenomena with real-world applications. In a nutshell and to paraphrase, fractals are <code>scale-invariant</code> - regardless of how much you zoom in or out, the picture still looks the same (or, self-similar, which is similar to, but not exactly the same as, looking the same).
 
 <img src="/static/mandelbrot-fractal.jpg">
 
 Well, that's not enough to be very interesting - if I zoom in or out on a graph of <code>y = x</code>, it looks <strike>pretty much</strike> exactly the same. No one is surprised by this, nor probably interested in it. Fractals on the other hand, have an aspect of chaos about them - while the system may be completely deterministic, it is nearly impossible to predict where the next move will end up. This is distinct from randomness - a chaotic system may have a very simple, easily-understood equation with no randomness whatsoever, and still seem to jump around <strike>randomly</strike> chaotically.
-
-Sidebar - I wonder if PRNG (pseudo random number generators) are considered chaotic. The equation is known (to some) and deterministic, but it <i>feels like</i> the numbers are random.
-
+<div class="panel panel-warning">
+    <div class="panel-heading">sidebar</div>
+    <div class="panel-body">I wonder if PRNG (pseudo random number generators) are considered chaotic. The equation is known (to some) and deterministic, but it <i>feels like</i> the numbers are random. Hmmm</div>
+</div>
 Chaotic systems abound in the real world - apparently this made a lot of physicists in the 1960s and 1970s disappointed since they were hoping the world had nice, neat, linear equations describing everything. Perhaps the most well-known example of a chaotic system is the weather - we can model it pretty well up to a point, but all the intricacies (read: nonlinear feedbacks) render forecasts after a certain point pretty much guesswork. Last I read, the upper limit on accuracy was something like 5 days, which is maybe why 5-day forecasts are relatively common, but say, 7-day forecasts are not.
 
-Fractals are, in a sense, visual representations of chaotic systems. *warning: hypothetical I made up* If you were to, say, graph the temperature at noon, every day for a year, it would seem to jump around on a day to day basis, though it follows some general pattern - warmer in summer, colder in winter for example. Now, if you were to graph the temperature every minute of a particular day (aka zooming in on this graph, and increasing the granularity) we will still see a pattern that seems to jump around, but likely following the pattern of cooler at night and warmer during the day. While maybe not the most beautiful fractal image [insert some links/photos of fractals, at some point], that's all fractality is - self-similarity across scale.
+Fractals are, in a sense, visual representations of chaotic systems. <b>*warning: hypothetical I made up*</b> If you were to, say, graph the temperature at noon, every day for a year, it would seem to jump around on a day to day basis, though it follows some general pattern - warmer in summer, colder in winter for example. Now, if you were to graph the temperature every minute of a particular day (aka zooming in on this graph, and increasing the granularity) you still see a pattern that seems to jump around, but likely following the pattern of cooler at night and warmer during the day. While maybe not the most beautiful fractal image that's all fractality is - self-similarity across scale.
 
 <h2>Evolution</h2>
-I'm also reading <i>Darwin's Dangerous Idea</i> by Daniel Dennett, which is a philosophical treatise that addresses <i>why</i> some people seem reluctant to accept that plain-and-simple evolution is responsible for all the variation not only among people but among species. This book also goes in-depth to understand, and then debunk, all of the serious arguments against evolution.
+<img src="/static/darwin-dennett.jpg">
 
-One of the most important things to grasp about evolution is that it doesn't have any end-goal in mind, it's not like evolution is some ethereal driving force with some ultimate plan like <a href="https://en.wikipedia.org/wiki/List_of_minor_The_Hitchhiker%27s_Guide_to_the_Galaxy_characters#Hactar">Hactar</a> from <a href="https://en.wikipedia.org/wiki/Life,_the_Universe_and_Everything">Life, the Universe and Everything</a><sup>1</sup>.
+I'm also reading <i>Darwin's Dangerous Idea</i> by Daniel Dennett, which is a philosophical treatise that addresses <i>why</i> some people seem reluctant to accept that plain-and-simple evolution is responsible for all the variation not only among people but among species. This book also goes in-depth to understand, and then debunk, many of the serious arguments against evolution.
 
-In fact, evolution doesn't "do" anything; it's more of a retrospective interpretation - mutations and sexual reproduction (i.e. not asexual/cloning) create new organisms with (slightly) different genotypes. Some of these genotypes happen to result in phenotypic alterations (some don't - genes have dead space where alterations do nothing. Or, do nothing <i>now</i>...), and some of these changes impact an organisms ability to reproduce. If it has a positive impact on reproduction rate, compared to the "normal" gene pool, it will gain ever-increasing shares of the population, until some other force or alteration causes this particular adaptation to be deemed less advantageous. Accumulate enough of these changes over time, and you can say "hey look at how they evolved". 
+One of the most important things to grasp about evolution is that it doesn't have any end-goal in mind, it's not like evolution is some ethereal driving force with an ultimate plan like <a href="https://en.wikipedia.org/wiki/List_of_minor_The_Hitchhiker%27s_Guide_to_the_Galaxy_characters#Hactar">Hactar</a> from <a href="https://en.wikipedia.org/wiki/Life,_the_Universe_and_Everything">Life, the Universe and Everything</a><sup>1</sup>.
 
+In fact, evolution doesn't "do" anything; it's more of a retrospective interpretation - mutations and sexual reproduction (i.e. not asexual/cloning<sup>2</sup>) create new organisms with (slightly) different genotypes. Some of these genotypes happen to result in phenotypic alterations (some don't - genes have dead space where alterations do nothing. Or, do nothing <i>now</i>...), and some of these changes impact an organism's ability to reproduce. If it has a positive impact on reproduction rate, compared to the "normal" gene pool, it will gain ever-increasing shares of the population, until some other force or alteration causes this particular adaptation to be deemed less advantageous. Accumulate enough of these changes over time, and you can say "hey look at how they evolved". 
+
+<div class="panel panel-warning">
+    <div class="panel-heading">sidebar</div>
+    <div class="panel-body">
+        It's actually an open and interesting question to consider when a new species has been created/born/branched. To further reinforce this idea of evolution being more of a retrospective analysis rather than a single specific event (<a href="https://en.wikipedia.org/wiki/Punctuated_equilibrium">punctuated equilibrium</a>-ish), a typical rubric for speciation is ability to sexually reproduce. Obviously, the organism in question has been able to reproduce, otherwise there would be none left to consider a species; but the question is "could it reproduce with some organism of the initial group, before all the adaptations?". If you wait long enough (and there has been sufficient evolutionary pressure), then eventually you'll hit a point where the current organism couldn't reproduce with the original, but there wasn't any single generation along the way that couldn't reproduce with its contemporaries.
+    </div>
+</div>
+Since we proved <a href="https://en.wikipedia.org/wiki/Lamarckism">Lamarckian inheritance</a> wrong, we know that organisms pass along all their information through genes, which dictate, in a sense "how to build the organism, generally". Humans have 23 pairs of chromosomes. All the DNA in them, carrying all the adaptations agglomerated over the eons through evolution are precisely what builds a person. 
 
 <sup>1</sup> I couldn't remember the name Hactar, nor that the planet was Krikkit, nor really anything about that scene except for the vague overview of "planet develops space travel?" which made google-searching pretty difficult; this did however lead me to read a lot of synopses and lists of characters/places about <i>Hitchhiker's Guide to the Galaxy</i>, so maybe I'll re-read/post about that soon.
+
+<sup>2</sup> Well, asexual/cloning could still work in evolution given a mutation rate greater than 0, but that's just a slower, less-effective version of sexual reproduction, with the heightened risk of extinction due to some adversarial cause. For example, the <a href="https://en.wikipedia.org/wiki/Cavendish_banana#Diseases">banana</a>.
