@@ -37,10 +37,19 @@ def processKeywords(lines):
     return blogDict
 
 def addLineBreaks(lines, blogDict, nlines=None):
-    lines = [l if l else LINE_BREAK*2 for l in lines]
+    new_lines = []
+    inside_pre_tag = False
+    for line in lines:
+        if line.startswith("<pre>"):
+            inside_pre_tag = True
+        elif line.endswith("</pre>"):
+            inside_pre_tag = False
+        if not inside_pre_tag and not line:
+            line = LINE_BREAK * 2
+        new_lines.append(line)
     if nlines is not None:
-        lines = lines[:nlines]
-    blogDict["text"] = "\n".join(lines)
+        new_lines = new_lines[:nlines]
+    blogDict["text"] = "\n".join(new_lines)
 
 def parseBlog(fname, nlines=None):
     if not os.path.exists(fname):
