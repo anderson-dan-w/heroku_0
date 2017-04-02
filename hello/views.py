@@ -6,7 +6,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 
 from .models import Greeting
-import blogParser
+from . import blogParser
 
 THIS_DIR = os.path.dirname(__file__)
 
