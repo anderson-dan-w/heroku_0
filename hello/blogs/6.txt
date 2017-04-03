@@ -1,0 +1,366 @@
+#title Free tools for great good
+#tags programming python git
+#published 2017-04-02 13:00
+#lastEdit 2017-04-02 13:00
+So, I want to be a good programmer. I want to write programs that work, and that work <i>well</i>. I want unittests and code coverage and automatic builds and continuous integration. I want to know, at a glance, that everything is working properly. How do I go about that?
+
+It might be informative to do this as a walkthrough - building up some simple example until it has all the error-checking, testing, robust features etc. required to feel confident my codebase works as intended.
+
+<h2>Version Control</h2>
+So, let's start with the barest of code bases: no code at all! Just make an empty Git repo, something like <a href="https://github.com/anderson-dan-w/free-tools-for-great-good/tree/8a12dbdd4232caf597cc8d5e54d18dd13b8b2f99">this</a>.
+
+This project is gonna try to be a little meta, somewhat self-referential, so let's make the code try to access/monitor the git repo in some way. We'll start small and build up as we go.
+
+We can create a simple function that will pull in the raw contents of our <code>README.md</code> file. there won't be much in there to monitor just yet, but bear with me.
+<pre><code class="python">import requests
+URL = "https://raw.githubusercontent.com/anderson-dan-w/free-tools-for-great-good/master/README.md"
+response = requestes.get(URL)
+print(response.text)
+</code></pre>
+and we can <code>git push</code> that to <a href="https://github.com/anderson-dan-w/free-tools-for-great-good/tree/905d442da4082b104e614449e439e325650a50e9">our repo</a> as <code>get_readme.py</code>. Now we've got a Python package that totally works!
+
+So, all of you, being excited about this mind-blowing new code I've created, clone my repo, boot up your Python REPL, and <code>import get_readme</code>. And you're greeted with a traceback, culminating in:
+<pre><code class="python">ImportError: No module named requests
+</code></pre>
+Huh? It worked for me, what'd you break?
+
+Oh, right, I forgot to mention, I had to <code>pip install requests</code> to get it to work. Well, now you're good to go, just install first, <i>then</i> run my code. Which version of <code>requests</code>? Hmm, I don't remember. I'm sure whatever one you get will totally work.
+
+That's actually a terribly fragile idea. Maybe you've already got <code>requests</code> but it's an old version and the API changed. Maybe I wrote this code so long ago, you got the <i>new</i> version and the API changed and mine no longer works. There's gotta be a way to figure this out...
+
+<h2>Package Management</h2>
+<code>pip</code> knows what it has and hasn't installed, right down to the version number. We can easily get a full listing of all the packages we've installed:
+<pre><code class="bash">$ pip freeze
+requests==2.13.0</code></pre>
+By convention, I'll save this off in a file call <code>requirements.txt</code> and add it to the repo, so that way everyone will know which packages we need. I'll need to update this whenever I add new packages to the project, but there will be just this one place with all the requirements clearly spelled out.
+
+Installing these packages is straight-forward as well - you won't need to open <code>requirements.txt</code> or go through them one-by-one. Just a simple:
+<pre><code class="bash">$ pip install -r requirements.txt
+</code></pre>
+and you're good to go!
+
+Well, you're good to go if you never have any other Python projects that require different versions of any of these libraries. What happens when my project uses package <code>foo</code> with <code>foo==1.2.3</code>, but you've got some legacy code that relies on some quirks in <code>foo==0.9.1</code> and there's a fancy new library coming out that promises a bunch of features, using <code>foo==2.1.0</code>?
+
+<h2>Environment Management</h2>
+What we need now is separate enviornments for siloing each of our Python projects. A way to say "I'm working on <code>free-tools-for-great-good</code> right now, so let's use only the packages <i>it</i> needs, and nothing else."
+
+There are a couple ways of doing this: <code>virtualenv</code>, <code>virtualenvwrapper</code>, and <code>anaconda</code> are the 3 I know of. This is purely subjective so feel free to go your own way, but I found <code>virtualenv</code> to be very unintuitive and I had a bit of trouble getting <code>virtualenvwrapper</code> to work smoothly without cluttering my package space. So, I've gone with <code>anaconda</code>, which also seemed to have the simplest portability among Unix, MacOS, and Windows. Again, not an expert, just my experiences thus far.
+
+Using <code>conda</code> is pretty simple once you get it installed. First, I create an environment for a particular project:
+<pre><code class="bash">$ conda create --name free-tools-for-great-good python=3.5</code></pre>
+You don't need to name your <code>conda env</code> after the project, but I feel like it's clear and easy to remember. This is one time work, and technically separate from our <code>git repo</code> - I can manage my environments with <code>conda</code> while you manage yours with <code>virtualenvwrapper</code>, it won't make a difference.
+
+Now that I have an environment manager, whenever I go to work on my Python project <code>free-tools-for-great-good</code>, I'll first run:
+<pre><code class="bash">$ source activate free-tools-for-great-good
+</code></pre>
+in all the terminals I'm using. Then, if there are new packages, I'd run <code>pip install -r requirements.txt</code>, and everything will be there - ready to use for this project, but not interfering with other projects (outside this environment).
+
+Ok, now I've got a way to install my packages safely, but I don't really have any proof that my code <i>works</i>. 
+<h2>Modular Code</h2>
+This will be a bit of a round-about way to get at proving my code works, but it makes sense to me, in the long run. If I want to prove my code works, I need to be able to test it. And to test it, I have to design it in such a way that I can safely reason about what it's doing at each stage along the way.
+
+As it exists now, all my code does is print the README to <code>stdout</code>, and there's no way to really reuse anything. There's no way to change the URL or even re-run the code short of kicking the program off again entirely. Let's start decomposing (functions, not biologically).
+
+I'm a big proponent of having Python packages be <code>import</code>-able into a Python REPL, and as such they shouldn't do all their work at the global level. That way, I can test things out, call functions repeatedly, and just generally debug things.
+
+Let's rearrange our <code>get_readme.py</code> code to use functions.
+<pre><code class="python">def get_readme():
+    response = requests.get(URL)
+    return response.text
+</code></pre>
+While doesn't look like much, now I can import this into a Python session, and run <code>get_readme()</code> whenever I want. This increased bit of flexibility will allow me to write much simpler tests later on (rather than, I don't even know, overriding <code>sys.stdout</code> temporarily, then <code>import get_readme</code> and capturing all output? bleh).
+
+So now I've got a reusable <a href="https://github.com/anderson-dan-w/free-tools-for-great-good/tree/32598c04b3c22eac1538a86a7a072ad81f57e76c">git repo</a>, but I still haven't done any testing.
+<h2>Folder Structure</h2>
+Where should I write my tests? If I write the tests inside the same file as my actual code, I'm now cluttering my package with all the cruft of unittesting. Or I'm jumping through hoops to remove all my testing from becoming part of the public API of my package. Or I'm writing <code>doctests</code> which aren't a bad idea, but always felt a little lacking to me.
+
+For a more in-depth explanation as to <i>why</i> I like the structure I'm about to explain, there's <a href="http://stackoverflow.com/a/3419951/2272638">this SO answer</a>, but in short:
+
+Python relative imports are confusing as hell. I have yet to fully understand or correctly guess on the first (and second) attempt how to do relative imports from given points within my Python package, and so I've settled on "assume I'm at the top level of my git repo".
+
+Now, we <i>*could*</i> make the top-level of the git repo into a Python package, but I don't really like that because things get cluttered - I end up with a <code>README.md</code> in the same directory as some, but not all, of my source code, and it just feels klunky. So instead, I've settled on (as explained in that Stack Overlfow link) a structure like the following:
+<pre><code class="bash">git-repo-name/
+|-- README
+|-- requirements.txt
+|-- ## other project-level configs
+|-- package_name/
+|   |-- __init__.py
+|   |-- main.py
+|   |-- module_name.py ## (or module_name/)
+|   |-- tests/
+|   |   |-- __init__.py
+|   |   |-- test_module_name.py
+</code></pre>
+There may be other folders to add as well, but that's more than enough to get us started. So what do we need to add, and why should we bother? We've alrady got <code>README.md</code> and <code>requirements.txt</code> at the top-level, so those can stay where they are.
+
+Why bother making a <code>package_name</code> directory, and why use <code>_</code> rather than <code>-</code>? This goes back relative imports, and also an issue I had the first time I was struggling to get continuous integration working.
+
+When someone clones a git-repo, they <i>usually</i> clone it with the same top-level folder name: <code>git clone https://github.com/anderson-dan-w/free-tools-for-great-good</code> will create a directory <code>free-tools-for-great-good</code>. However, sometimes it makes sense to (or users just decide they would rather) rename the directory: <code> git clone https://github.com/anderson-dan-w/free-tools-for-great-good ftfgg</code> will create a directory <code>ftfgg</code>.
+
+Now, that might be all well and good, but if your <code>__init__.py</code> is at the top-level of your git repo, and you try to use relative imports, well, everything breaks for the renamed repo. Now the codebase has a hard-coded dependency on how the user <code>clones the repo</code>, and it means your repo names must also be valid Python identifiers. I simply can't use relative imports correctly with my repo as is, since <code>from free-tools-for-great-good import get_readme</code> will raise a <code>SyntaxError</code>.
+
+Instead of dealing with all that difficulty, it's substantially easier and cleaner to just create a "src" directory. Since "src" doesn't mean anything special in Python, not even by convention, it may as well be a more descriptive name.
+
+In fact, for someone using my package, it wouldn't make sense to say <code>from src import get_readme</code> because what if there was another package that <i>also</i> used "src"?  There would be name-clashing and the user wouldn't always be importing the package they meant, and "src" is just terribly nondescript.
+
+So, we name our first subdirectory with a valid Python identifier. We can call the top-level git repo whatever we want, but it's reasonable that the Python package we're importing should have a valid identifier as a name. So that's why we end up with <code>package_name</code>.
+
+Just setting that part up, <a href="https://github.com/anderson-dan-w/free-tools-for-great-good/tree/d4533182312a75df013053eb9498531f9bef6d81">our git repo</a> now looks like this:
+<pre><code class="bash">free-tools-for-great-good
+|-- README.md
+|-- requirements.txt
+|-- free_tools
+|   |-- __init__.py
+|   |-- get_readme.py
+</code></pre>
+<h2>Unittesting</h2>
+Now, we're finally ready to start testing! We create out <code>tests</code> directory, with an <code>__init__.py</code> inside, so it's callable as a Python module with relative imports just like the rest of the package.
+
+We name the file that tests our package <code>test_module_name</code> for 2 reasons.
+<ul>
+    <li>It is absurdly clear which module this will test. S</li>
+    <li>Python's <code>unittest</code> framework looks for the prefix <code>test_</code> everywhere, enabling it to automatically detect and run tests without the user having to specify each and every module.
+</ul>
+Unittesting in Python is pretty simple and straight-forward: you run the function you care about, and assert that the output is what you'd expect. So, our code inside <code>test_get_readme.py</code> would look something like:
+<pre><code class="python">import unittest
+
+from free_tools import get_readme
+
+
+class TestGetReadme(unittest.TestCase):
+    def test_get_readme():
+        expect_contains = "free tools for great good"
+        observed = get_readme.get_readm()
+        self.assertIn(expect_contains, observed.lower())
+</code></pre>
+I don't love the naming style of <code>class TestGetReadme</code> but haven't thought of anything better. Open to suggestions though.
+
+And how might we run this test code? With Python's <code>nosetests</code> package. This seemed to be already installed for me, but there's a chance you'd need to <code>pip install nose</code> and add it to <code>requirements.txt</code>.
+
+Running <code>$ nosetests</code> from the top-level of <a href="https://github.com/anderson-dan-w/free-tools-for-great-good/tree/06797219a5ca82b85784e0424d44757923e275ca">my git repo</a> now produces:
+<pre><code class="bash">$ nosetests
+.
+------------------------------------------------------------
+Ran 1 test in 0.184s
+
+OK
+</code></pre>
+The single <code>.</code> is a shorthand way of saying "this test passed" - if you had 3 tests that passed, you'd see <code>...</code>, and if you had one fail, one pass, and one error, you'd see <code>F.E</code>.
+
+Awesome, my tests all pass! I now know all my code works without fail, since none of my tests fail!
+
+<h2>Code Coverage</h2>
+Let's add more code, keep this train a-movin. Let's say we want to get our <code>README.md</code> in all upper case, to show how excited we are about the project. We could add an argument to our existing function, but in effort to follow the <a href="https://en.wikipedia.org/wiki/Single_responsibility_principle">Single Responsibility Principle</a>, let's make a new function:
+<pre><code class="python">def get_readme_all_caps():
+    text = get_readme()
+    return text.lower()
+</code></pre>
+Let's rerun our tests - still passing all 1 test - we must be good to go! You can pull <a href="https://github.com/anderson-dan-w/free-tools-for-great-good/tree/cbde283da18c240635bb33650ad610c42a96af3a">my repo</a>, run all the tests and feel confident that everything works, right?
+
+But then you go to <i>use</i> all my new functionality and realize it just doesn't work. there aren't any caps. NONE AT ALL! So you dive into the code - easy in this contrived example, sure, but even still - and eventually realize the issue: <code>return text.lower()</code>. This code <i>never</i> worked as intended. But all the tests pass! I must not have tested this, or not tested it correctly.
+
+How can I not only assert that all my tests pass, but also assert that I've tested all my code? With <code>code coverage</code>. In Python, there's a fantastic module, called quite simply <code>coverage</code> that helps us. We'll need to <code>pip install coveragy</code> and then add it to our <code>requirements.txt</code> first.
+
+Then, we can run <code>coverage</code> through <code>nose</code> and see if we've covered everything:
+<pre><code class="bash">$ nosetests --with-coverage
+.
+Name                                                       Stmts   Miss  Cover
+------------------------------------------------------------------------------
+cgi.py                                                       590    590     0%
+ctypes.py                                                    330    330     0%
+ctypes/_endian.py                                             35     35     0%
+ctypes/macholib.py                                             1      1     0%
+ctypes/macholib/dyld.py                                       89     89     0%
+ctypes/macholib/dylib.py                                      20     20     0%
+ctypes/macholib/framework.py                                  23     23     0%
+ctypes/util.py                                               209    209     0%
+encodings/idna.py                                            180    180     0%
+hmac.py                                                       60     60     0%
+html.py                                                       37     37     0%
+html/entities.py                                               9      9     0%
+http/client.py                                               714    714     0%
+http/cookiejar.py                                           1102   1102     0%
+http/cookies.py                                              246    246     0%
+mimetypes.py                                                 194    194     0%
+netrc.py                                                     106    106     0%
+requests.py                                                   30     30     0%
+requests/_internal_utils.py                                   16     16     0%
+requests/adapters.py                                         205    205     0%
+requests/api.py                                               22     22     0%
+requests/auth.py                                             160    160     0%
+requests/certs.py                                              9      9     0%
+requests/compat.py                                            37     37     0%
+requests/cookies.py                                          237    237     0%
+requests/exceptions.py                                        32     32     0%
+requests/hooks.py                                             15     15     0%
+requests/models.py                                           441    441     0%
+requests/packages.py                                          12     12     0%
+requests/packages/chardet.py                                  11     11     0%
+requests/packages/urllib3.py                                  38     38     0%
+requests/packages/urllib3/_collections.py                    178    178     0%
+requests/packages/urllib3/connection.py                      160    160     0%
+requests/packages/urllib3/connectionpool.py                  313    313     0%
+requests/packages/urllib3/contrib.py                           0      0   100%
+requests/packages/urllib3/exceptions.py                       96     96     0%
+requests/packages/urllib3/fields.py                           69     69     0%
+requests/packages/urllib3/filepost.py                         39     39     0%
+requests/packages/urllib3/packages.py                          3      3     0%
+requests/packages/urllib3/packages/six.py                    444    444     0%
+requests/packages/urllib3/packages/ssl_match_hostname.py      11     11     0%
+requests/packages/urllib3/poolmanager.py                     140    140     0%
+requests/packages/urllib3/request.py                          38     38     0%
+requests/packages/urllib3/response.py                        302    302     0%
+requests/packages/urllib3/util.py                             10     10     0%
+requests/packages/urllib3/util/connection.py                  66     66     0%
+requests/packages/urllib3/util/request.py                     45     45     0%
+requests/packages/urllib3/util/response.py                    32     32     0%
+requests/packages/urllib3/util/retry.py                      144    144     0%
+requests/packages/urllib3/util/selectors.py                  332    332     0%
+requests/packages/urllib3/util/ssl_.py                       125    125     0%
+requests/packages/urllib3/util/timeout.py                     59     59     0%
+requests/packages/urllib3/util/url.py                        102    102     0%
+requests/packages/urllib3/util/wait.py                        16     16     0%
+requests/sessions.py                                         264    264     0%
+requests/status_codes.py                                       8      8     0%
+requests/structures.py                                        40     40     0%
+requests/utils.py                                            354    354     0%
+stringprep.py                                                 65     65     0%
+uuid.py                                                      331    331     0%
+free_tools.py                                                  0      0   100%
+free_tools/get_readme.py                                       8      2    75%
+------------------------------------------------------------------------------
+TOTAL                                                       9004   8998     1%
+----------------------------------------------------------------------
+Ran 1 test in 0.165s
+
+OK
+</code></pre>
+What in the hell?! What are all these things?
+
+Well, <code>coverage</code> is almost too good by default: it checks <i>all</i> of the code, including any imported packages. We don't want all that junk though, since we'll assume <code>requests</code> has already tested its code (though... who knows. An assumption worth revisiting every once in a while).
+
+We can get rid of this extra information by telling <code>coverage</code> to ignore certain files/directories through use of a <code>.coveragerc</code> file.
+
+At the top-level of our git repo (since that's where we'll be calling <code>nosetests</code> from), let's create <code>.coveragerc</code> with the following:
+<pre><code class="bash">[report]
+    show_missing = True
+    omit = 
+        */python?.?/*
+        *site-packages/nose/*
+</code></pre>
+This excludes anything installed via <code>pip install</code>, so now if we run our tests we get:
+<pre><code>$ nosetests --with-coverage
+.
+Name                       Stmts   Miss  Cover   Missing
+--------------------------------------------------------
+free_tools.py                  0      0   100%
+free_tools/get_readme.py       8      2    75%   12-13
+--------------------------------------------------------
+TOTAL                          8      2    75%
+----------------------------------------------------------------------
+Ran 1 test in 0.215s
+
+OK
+</code></pre>
+This is much more reasonable than what we had before. Now, it's very clear - we didn't test everything in our repo. Specifically, we didn't test <a href="https://github.com/anderson-dan-w/free-tools-for-great-good/blob/cbde283da18c240635bb33650ad610c42a96af3a/free_tools/get_readme.py#L12-L13">lines 12 and 13</a> - doesn't get much clearer than that!
+
+So let's write a test for that function. In <code>free_tools/tests/test_get_readme.py</code> we can add the following:
+<pre><code class="python">    def test_get_readme_all_caps(self):
+        expect_contains = "FREE TOOLS FOR GREAT GOOD"
+        observed = get_readme.get_readme_all_caps()
+        self.assertIn(expect_contains, observed)
+</code></pre>
+Now if we re-run our tests, we get:
+<pre><code class="bash">$ nosetests --with-coverage
+.F
+======================================================================
+FAIL: test_get_readme_all_caps (free_tools.tests.test_get_readme.Test_Get_Readme)
+<messy stack trace with logging>
+
+Name                       Stmts   Miss  Cover   Missing
+--------------------------------------------------------
+free_tools.py                  0      0   100%
+free_tools/get_readme.py       8      0   100%
+--------------------------------------------------------
+TOTAL                          8      0   100%
+----------------------------------------------------------------------
+Ran 2 tests in 0.286s
+
+FAILED (failures=1)
+</code></pre>
+Alright, this is... improvement? We've got 100% code coverage, but we failed a test. Yes, this is <i>definitely</i> an improvement - we know exactly what's not working. Since we've kept our functions small and concise (and it's a simple example), it's relatively trivial to dive in, figure out what the problem is, and fix it:
+<pre><code class="python">def get_readme_all_caps():
+    text = get_readme()
+    ## instead of: return text.lower() we actually meant
+    return text.upper()
+</code></pre>
+Ok, so <i>now</i> we can feel confident that <a href="https://github.com/anderson-dan-w/free-tools-for-great-good/tree/7e6f10545a3d37a42a63ca104b36c633896ff6e9">our git repo</a> tests all the code and everything's working as it's supposed to.
+
+But how do we tell <i>others</i> that it's working. Do they have to look at my repo, then clone it, then run the unittests, then check the coverage report themselves, assimilating all the information along the way, to decide whether or not this repo is up to date and well-tested? Such an onerous set of tasks, couldn't we automate it somehow?
+
+<h2>Continuous Integration</h2>
+Travis CI is a free and oper source code building/testing framework that hooks in seamlessly with Github.
+
+What we can do is set up Travis CI to run our unittests everytime we push a new commit to our repo. There's some work involved in tying the two together - you need to:
+<ul>
+    <li>Create an account, preferably through your Github account, with Travis CI</li>
+    <li>Tell Github that you want to integrate with Travis CI (through the <a href="https://github.com/integrations">integrations</a> link)</li>
+    <li>Turn on the repositor(y|ies) you want Travis CI to run on</li>
+</ul>
+At which point, you're still not done because you didn't tell Travis CI <i>what</i> to actually run for that repo. So you need to create a <code>.travis.yml</code>
+
+What should your <code>.travis.yml</code> look like? Combing through their website is surprisingly unhelpful - they've got known bugs/discrepancies about what's offered (looking at you, Python 3.5) and what you can reference, and they get way too generic way too quickly. So here's a minimal <code>.travis.yml</code>:
+<pre><code class="bash"> language: python
+python:  "3.4"
+install: pip -r requirements.txt
+script: nosetests --with-coverage
+</code></pre>
+<ul>
+    <li>...then you need to push your commit with <code>.travis.yml</code></li>
+    <li>...then you need to <i>enable</i> this repo on Travis, if it isn't already</li>
+<li>...then you need to push something, anything, to tell Travis, now that it's aware of you and now that it has a <code>.travis.yml</code> to actually run</li>
+</ul>
+Maybe there's a simpler path here, but I haven't been able to consistently reproduce it.
+
+So, after setting up the integrations, turning the repo on in Travis, and altering <a href="https://github.com/anderson-dan-w/free-tools-for-great-good/tree/9b0927f305731af78750f8bcde5ce553e30c171e">our repo</a>, whenever we commit, it will kick off <a href="https://travis-ci.org/anderson-dan-w/free-tools-for-great-good/builds/217930415">our build on Travis CI</a>.
+
+Great! Now Travis knows whether or not our build passed! But, that's tedious for anyone who comes to view this code on Github, to <i>also</i> schlepp over to Travis to see if the build is passing, and to read the unittest code-coverage report at the bottom of the build. Too manual!
+
+Well, right underneath the name of the repo is a little button/badge that looks like <img src="https://travis-ci.org/anderson-dan-w/free-tools-for-great-good.svg?branch=master"></img>
+
+Note: I have no idea what this badge actually says at this moment, because it's a "live" link, so if I break the build, it'll go from saying "build:passing" to "build:failed" or something.
+
+What can we do with this? Well, just like I embedded it here on the blog, we can embed it <i>inside the git repo</i>! We'll add it to our <code>README.md</code> and display it loud and proud for everyone to see:
+<pre><code class="markdown"> [![Build Status](https://travis-ci.org/anderson-dan-w/free-tools-for-great-good.svg?branch=master)](https://travis-ci.org/anderson-dan-w/free-tools-for-great-good)
+</code></pre>
+and now we can see our icon at the homepage of <a href="https://github.com/anderson-dan-w/free-tools-for-great-good/tree/eed21bf9695b5ea38bf1fb3de8f49442e25e8b8f">our git repo</a>
+
+Sidenote: Github will aggressively cache the image that is this badge, so sometimes, you'll commit new changes, check Travis to see that everything built properly now, but your badge still says "failed" for another hour or so. It's a known problem and I don't really know how to reasonably get around it. See <a href=
+"https://github.com/github/markup/issues/224#issuecomment-39193230">this comment with reference to &lt;img src="camo.etc...."&gt;</a> aka the camo-ified URL and <a href="https://github.com/github/markup/issues/224#issuecomment-43455189">this comment about <code>curl -X PURGE camo-ified URL</code></a>. I don't even pretend to moderately understand what's happening, but, yeah, sometimes your badge is lagged.
+
+But still, this doesn't tell us, at a glance, if we have 100% code coverage. We either need to assume the author has implemented a hook where their tests fail if they don't have a certain amount of coverage, or go look at the Travis CI output still, defeating most of the purpose of this helpful little <img src="https://travis-ci.org/anderson-dan-w/free-tools-for-great-good.svg?branch=master"></img> badge.
+
+<h2>Code Coverage Badge</h2>
+Or we can use another inegration service build expressly for this purpose: <code>coveralls</code>. As before, we need to
+<ul>
+    <li>enable this integration from Github</li> 
+    <li>...then sign up on <a href="coveralls.io">coveralls.io</a> with our Github account</li> 
+    <li>...then we need to enable our repo on <code>coveralls</code> (and if your repo isn't showing up, trying <a href="https://coveralls.io/refresh">refreshing</a> before <a href="https://github.com/lemurheavy/coveralls-public/issues/557#issuecomment-119335042">submitting a ticket</a>).</li>
+    <li>...then <code>pip install coveralls</code> and add it to our <code>requirements.txt</code></li>
+    <li>...then we need to alter our <code>.travis.yml</code> to invoke <code>coveralls</code></li>
+</ul>
+All we should need to add is:
+<pre><code class="bash"> after_success: coveralls
+</code></pre>
+The documentation on the <code>coveralls</code> is also pretty scant/unhelpful: it knows you've got a Python project but (as of the time of this writing, 2017-04-02) still tells you to make changes to your <code>gemfile</code> which is ... ruby, not Python.
+
+Anyways, once that all gets working, which... might take a while, because things don't always seem to sync up very quickly, we should be able to access our code coverage statistics at <a href="https://coveralls.io/github/anderson-dan-w/free-tools-for-great-good">our git repo on coveralls</a>
+
+Great! But, I <i>still</i> don't want to go to Github, look at a repo, see that the build is passing, and then have to click an entire extra link to see the code coverage! I want all my information in a single glance dammit!
+
+So, let's alter our <code>README.md</code> again, to add the <code>coveralls</code> badge (<img src="https://coveralls.io/repos/github/anderson-dan-w/free-tools-for-great-good/badge.svg?branch=master)"></img>):
+<pre><code class="bash">[![Coverage Status](https://coveralls.io/repos/github/anderson-dan-w/free-tools-for-great-good/badge.svg?branch=master)](https://coveralls.io/github/anderson-dan-w/free-tools-for-great-good?branch=master)
+</code></pre>
+Same caveat about Github aggressive caching applies - if you're not seeing an up-to-date page, either try clearing your cookies/cache, or try from another computer, or <code>curl -X PURGE</code> or just wait a few hours...
+
+and now, finally, at long last, we can see on a single page: <a href="https://github.com/anderson-dan-w/free-tools-for-great-good/tree/a02e7bf77e5e924b7a8a7585139eb18a24110264">our repo</a> with it's <code>README.md</code>, its <code>Travis CI</code> badge and its <code>coveralls</code> badge.
