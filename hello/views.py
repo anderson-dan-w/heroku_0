@@ -3,19 +3,21 @@ import os
 import sys
 
 from django.shortcuts import render
-from django.http import HttpResponse
 
 from .models import Greeting
 from . import blogParser
 
 THIS_DIR = os.path.dirname(__file__)
 
+
 def dprint(*args, **kwargs):
     print(*args, **kwargs)
     sys.stdout.flush()
 
+
 def index(request):
     return render(request, 'index.html')
+
 
 def db(request):
     greeting = Greeting()
@@ -23,19 +25,24 @@ def db(request):
     greetings = Greeting.objects.all()
     return render(request, 'db.html', {'greetings': greetings})
 
+
 def aboutme(request):
     return render(request, 'aboutme.html')
+
 
 def books(request):
     return render(request, 'books.html')
 
+
 def bookclub(request):
     return render(request, 'bookclub.html')
+
 
 def blogs(request):
     ctx = {}
     ctx["recentSnippets"] = blogParser.getRecentSnippets()
     return render(request, "blogs.html", ctx)
+
 
 def nblog(request, blogIndex=-1):
     ctx = dict(blogIndex=blogIndex, text="empty text")

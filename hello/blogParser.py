@@ -15,8 +15,9 @@ KEYWORDS = [
 
 ## apply arbitrary functions to the value (line) stored by addKeyword()
 POST_PROCESS_KEYWORDS = {
-    "tags" : lambda x: x.split()
+    "tags": lambda x: x.split()
 }
+
 
 def addKeyword(keyword, line, blogDict):
     remove = "#" + keyword + " "
@@ -24,6 +25,7 @@ def addKeyword(keyword, line, blogDict):
         blogDict[keyword] = line.replace(remove, "")
         return True
     return False
+
 
 def processKeywords(lines):
     blogDict = {}
@@ -35,6 +37,7 @@ def processKeywords(lines):
         if k in blogDict:
             blogDict[k] = fn(blogDict[k])
     return blogDict
+
 
 def addLineBreaks(lines, blogDict, nlines=None):
     new_lines = []
@@ -51,6 +54,7 @@ def addLineBreaks(lines, blogDict, nlines=None):
         new_lines = new_lines[:nlines]
     blogDict["text"] = "\n".join(new_lines)
 
+
 def parseBlog(fname, nlines=None):
     if not os.path.exists(fname):
         return {}
@@ -61,17 +65,19 @@ def parseBlog(fname, nlines=None):
     addLineBreaks(lines, d, nlines)
     return d
 
+
 def getSnippet(fname):
     return parseBlog(fname, 1)
 
+
 def getRecentSnippets():
-    nrecent = 3
+    nrecent = 5
     snippets = []
     for fname in os.listdir(BLOG_DIR):
         if not fname.endswith(".txt"):
             continue
         snippet = getSnippet(os.path.join(BLOG_DIR, fname))
         snippets.append(snippet)
-    snippets.sort(key=lambda d:d['published'], reverse=True)
+    snippets.sort(key=lambda d: d['published'], reverse=True)
     return snippets[:nrecent]
 
