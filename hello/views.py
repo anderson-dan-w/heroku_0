@@ -5,7 +5,7 @@ import sys
 from django.shortcuts import render
 
 from .models import Greeting
-from . import blogParser
+from . import blog_parser
 
 THIS_DIR = os.path.dirname(__file__)
 
@@ -40,13 +40,13 @@ def bookclub(request):
 
 def blogs(request):
     ctx = {}
-    ctx["recentSnippets"] = blogParser.getRecentSnippets()
+    ctx["recentSnippets"] = blog_parser.getRecentSnippets()
     return render(request, "blogs.html", ctx)
 
 
 def nblog(request, blogIndex=-1):
     ctx = dict(blogIndex=blogIndex, text="empty text")
     fname = os.path.join(THIS_DIR, "blogs", "{}.txt".format(blogIndex))
-    ctx.update(blogParser.parseBlog(fname))
+    ctx.update(blog_parser.parseBlog(fname))
     return render(request, "blogs.html", ctx)
 
