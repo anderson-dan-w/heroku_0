@@ -1,0 +1,36 @@
+#title n-gram Word Modeling
+#subtitle First of many HeadlinePuzz-related posts
+#tags programming python
+#published 2017-05-15 21:30
+#lastEdit 2017-05-15 21:30
+The <a href="http://www.thephoenixsociety.org/puzzles/puzzles.htm">Headline Puzz</a> is a delightfully diabolical, multi-layer puzzle. Over the years, I've used the challenges presented by the puzzle to help hone my programming, and abstract thinking, skills. This particular post will focus on <code>word modeling</code>.
+
+The first layer of the onion that is the Headline Puzz involves cryptograms, where each letter of the alphabet is replaced by a different one. Within each headline the letters are consistent, so if <code>X</code> stands for <code>A</code> in one spot, every <code>X</code> will stand for <code>A</code>.
+
+<div class="panel panel-warning">
+    <div class="panel-heading">Alphabetic Substitution Types
+        <button type="button" class="btn btn-default" id="monoalphabetic_aside_toggle">show/hide</button>
+    </div>
+    <div class="panel-body" id="monoalphabetic_aside">
+    When the mapping between letters stays consistent throughout the cryptogram, that's referred to as a <code>monoalphabetic substitution (cipher)</code> because there's only one alphabet (aka mapping).
+
+    There are some weaknesses with monoalphabetic substitutions, such as susceptibility to letter frequency analysis, especially for longer texts. To make life more difficult, some ciphers use <code>polyalphabetic substitutions</code> where each letter corresponds to a different mapping. This is significantly harder to solve (you need a lot more text to even try something like letter frequency analysis, and have to do a ton of extra work besides).
+
+    Thankfully, the Headline Puzz uses <code> monoalphabetic substitution</code>, but one of the particularly devious twists is that headlines are so short (and use so many atypical words) that letter frequency analysis is generally useless at best and a red herring otherwise.
+    </div><!-- end panel-body -->
+</div><!-- end panel -->
+One (slow) way to solve a cryptogram would be to try every possible mapping. At first glance, that might sound fine: "What if <code>X</code> stands for <code>A</code>? Ok, now what if it stands for <code>B</code>? Ok, now..." but we get a combinatorial explosion with the number of permutations. Because, actually we need to consider "What if <code>X=A</code> and <code>Y=L</code>? Ok, what if <code>X=A</code> but <code>Y=M</code>? ..." and etc. Quick math says there are <code>26!</code> different mappings (also called permutations), if we only consider case-insensitive letters, no punctuation or digits. That's <code>~2<sup>88</sup></code>, and would probably take well past the heat death of the universe before we could test every single variation.
+
+But even if we <em>could</em> try them all, we still wouldn't be done: how would we know when we found the right solution? We need some way to compare mappings and say that one is better than another. Now, <em>if</em> we could try every permutation, and <em>if</em> we knew what language it was in, and <em>if</em> we knew that every bunch of letters corresponded to an actual word (as opposed to abbreviations, proper nouns, typos, etc.), then we could apply a mapping and check whether or not all the resulting bunches of letters were actual words.
+
+We can do better though. Rather, we have to do better because we can't try them all and we don't have any guarantees that it's all words - another reasons headlines make this more difficult. So, we should <em>probably</em> try something more probabilistic.
+
+<h2>Word Modeling</h2>
+
+<script>
+$("#monoalphabetic_aside_toggle").click(function() {
+    $("#monoalphabetic_aside").toggle("show");
+});
+// initially hidden
+$("#monoalphabetic_aside_toggle").click();
+</script>
