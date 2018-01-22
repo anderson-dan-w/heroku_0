@@ -118,7 +118,7 @@ Now, we're finally ready to start testing! We create out <code>tests</code> dire
 
 We name the file that tests our package <code>test_module_name</code> for 2 reasons.
 <ul>
-    <li>It is absurdly clear which module this will test. S</li>
+    <li>It is absurdly clear which module this will test.</li>
     <li>Python's <code>unittest</code> framework looks for the prefix <code>test_</code> everywhere, enabling it to automatically detect and run tests without the user having to specify each and every module.
 </ul>
 Unittesting in Python is pretty simple and straight-forward: you run the function you care about, and assert that the output is what you'd expect. So, our code inside <code>test_get_readme.py</code> would look something like:
@@ -159,7 +159,7 @@ Let's rerun our tests - still passing all 1 test - we must be good to go! You ca
 
 But then you go to <i>use</i> all my new functionality and realize it just doesn't work. there aren't any caps. NONE AT ALL! So you dive into the code - easy in this contrived example, sure, but even still - and eventually realize the issue: <code>return text.lower()</code>. This code <i>never</i> worked as intended. But all the tests pass! I must not have tested this, or not tested it correctly.
 
-How can I not only assert that all my tests pass, but also assert that I've tested all my code? With <code>code coverage</code>. In Python, there's a fantastic module, called quite simply <code>coverage</code> that helps us. We'll need to <code>pip install coveragy</code> and then add it to our <code>requirements.txt</code> first.
+How can I not only assert that all my tests pass, but also assert that I've tested all my code? With <code>code coverage</code>. In Python, there's a fantastic module, called quite simply <code>coverage</code> that helps us. We'll need to <code>pip install coverage</code> and then add it to our <code>requirements.txt</code> first.
 
 Then, we can run <code>coverage</code> through <code>nose</code> and see if we've covered everything:
 <pre><code class="bash">$ nosetests --with-coverage
